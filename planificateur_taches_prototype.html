@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Planificateur visuel - Prototype</title>
+<style>
+  :root{
+    --sidebar-width:320px;
+    --hour-width:80px;
+    --bg:#f6f7fb;
+    --card:#ffffff;
+    --muted:#777;
+    --accent:#3467eb;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:var(--bg);color:#222;}
+  .app{display:flex;height:100vh;box-sizing:border-box;}
+  .sidebar{width:var(--sidebar-width);background:linear-gradient(180deg,#fff,#fbfdff);border-right:1px solid #e6e9ef;padding:16px;box-sizing:border-box;overflow:auto;}
+  .sidebar h2{margin:0 0 8px 0;font-size:18px;}
+  .btn{display:inline-block;padding:8px 10px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-weight:600;}
+  .muted{color:var(--muted);font-size:13px;}
+  .search{margin-top:10px;display:flex;gap:8px;align-items:center;}
+  .search input{flex:1;padding:8px;border-radius:8px;border:1px solid #e0e4ee;background:#fff;}
+  .task-list{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+  .task-item{padding:10px;border-radius:8px;border:2px solid transparent;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:grab;}
+  .task-meta{font-size:12px;color:var(--muted);margin-top:4px;}
+  .small-btn{padding:6px 8px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;}
+  .main{flex:1;display:flex;flex-direction:column;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e6e9ef;background:linear-gradient(180deg,#fff,#fcfdff);}
+  .views{display:flex;gap:8px;align-items:center;}
+  .timeline-wrap{flex:1;display:flex;overflow:auto;position:relative;padding:12px;}
+  .days-column{display:flex;flex-direction:column;gap:12px;width:100%;}
+  .day{background:linear-gradient(180deg,#fff,#fbfdff);border-radius:10px;padding:8px;border:1px solid #eceef5;box-shadow:0 2px 6px rgba(30,40,80,0.03);}
+  .day-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .hours{position:relative;display:flex;border-top:1px solid #eee;border-bottom:1px solid #eee;overflow:hidden;}
+  .hour{min-width:var(--hour-width);padding:8px 6px;text-align:center;border-right:1px dashed #f0f2f7;font-size:12px;color:var(--muted);background:linear-gradient(180deg,#fafbff,#fff);}
+  .timeline-body{position:relative;height:140px;overflow:hidden;}
+  .task-block{position:absolute;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;box-shadow:0 4px 10px rgba(50,60,90,0.08);cursor:move;}
+  .task-controls{display:flex;gap:6px;align-items:center;}
+  .chip{font-size:12px;padding:6px 8px;border-radius:6px;background:#f4f6fb;border:1px solid #e6e9ef;}
+  .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(10,20,50,0.2);padding:18px;z-index:999;width:420px;max-width:95%;}
+  .overlay{position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.35);z-index:990;}
+  label{display:block;font-size:13px;margin-top:8px;color:#223;}
+  input[type="text"], input[type="number"], select {width:100%;padding:8px;border-radius:8px;border:1px solid #e3e6f0;background:#fff;box-sizing:border-box;}
+  .row{display:flex;gap:8px;align-items:center;}
+  .muted-small{color:#8892b0;font-size:12px;}
+  footer{padding:8px 16px;text-align:center;color:var(--muted);font-size:13px;}
+  .small-icon{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:#fff;border:1px solid #e6e9ef;cursor:pointer;}
+  .collapse-btn{font-size:12px;padding:6px;border-radius:6px;background:#fff;border:1px solid #e6e9ef;}
+  .completed{opacity:0.45;text-decoration:line-through;}
+  @media (max-width:900px){:root{--sidebar-width:260px;--hour-width:60px} .sidebar{display:block}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <h2>Planificateur</h2>
+    <div class="row" style="gap:10px;margin-top:10px;">
+      <button class="btn" id="btnNew">+ Nouvelle tâche</button>
+      <div class="muted-small">Durée par défaut : <strong id="defaultDurStr">1h</strong></div>
+    </div>
+    <div class="search">
+      <input id="search" placeholder="Rechercher nom, famille ou groupe..." />
+      <button class="small-btn" id="resetSearch">X</button>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+      <div class="chip">Total tâches: <span id="countTasks">0</span></div>
+      <div class="chip">Planifiées: <span id="countPlanned">0</span></div>
+    </div>
+    <div class="task-list" id="taskList"></div>
+    <div style="height:40px;"></div>
+    <div style="margin-top:12px;">
+      <div class="muted-small">Astuce: glisse une tâche vers la timeline.</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="views">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="small-btn" data-view="1" id="viewDay">Jour</button>
+          <button class="small-btn" data-view="7" id="viewWeek">Semaine</button>
+          <button class="small-btn" data-view="30" id="viewMonth">Mois</button>
+        </div>
+        <div style="margin-left:10px;" class="muted-small">Vue:</div>
+      </div>
+      <div class="task-controls">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;"><input type="checkbox" id="showCurrentLine" checked/> Ligne heure actuelle</label>
+      </div>
+    </div>
+
+    <div class="timeline-wrap" id="timelineWrap">
+      <div style="min-width:100%;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div id="daysColumn" class="days-column" style="flex:1"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>Prototype — sauvegarde locale dans ton navigateur. Héberge sur Netlify / GitHub Pages pour partager.</footer>
+  </main>
+</div>
+
+<!-- modal template -->
+<div id="modalTemplate" style="display:none;">
+  <div class="overlay"></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3 id="modalTitle">Nouvelle tâche</h3>
+    <label>Nom</label><input id="tName" type="text" />
+    <div class="row" style="gap:8px;">
+      <div style="flex:1">
+        <label>Durée (heures)</label>
+        <input id="tDurationH" type="number" min="0" step="1" value="1"/>
+      </div>
+      <div style="flex:1">
+        <label>Durée (minutes)</label>
+        <input id="tDurationM" type="number" min="0" step="5" value="0"/>
+      </div>
+    </div>
+    <label>Famille</label><input id="tFamily" type="text" placeholder="ex: administratif" />
+    <label>Groupe</label><input id="tGroup" type="text" placeholder="ex: projet X" />
+    <div class="row" style="margin-top:8px;align-items:center;">
+      <label style="flex:1"><input id="tUrgent" type="checkbox" /> Urgent</label>
+      <label style="flex:1"><input id="tImportant" type="checkbox" /> Important</label>
+    </div>
+    <label>Couleur fond</label><input id="tColor" type="color" value="#3b82f6" />
+    <label>Couleur bordure</label><input id="tBorderColor" type="color" value="#1f4ed8" />
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+      <button class="small-btn" id="btnCancel">Annuler</button>
+      <button class="btn" id="btnSave">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======= Configuration =======
+const HOUR_WIDTH = 80; // px per hour
+const SNAP_MINUTES = 15; // snapping grid minutes (15)
+const DEFAULT_DURATION_MIN = 60; // default 1h in minutes
+// state
+let tasks = [];
+let viewDays = 1; // 1 day, 7 week, 30 month
+const daysColumn = document.getElementById('daysColumn');
+const searchInput = document.getElementById('search');
+const countTasksEl = document.getElementById('countTasks');
+const countPlannedEl = document.getElementById('countPlanned');
+const showCurrentLineCheckbox = document.getElementById('showCurrentLine');
+
+// helpers
+function uid(){ return 't'+Math.random().toString(36).slice(2,9); }
+function save(){ localStorage.setItem('planner_v1', JSON.stringify(tasks)); }
+function load(){ tasks = JSON.parse(localStorage.getItem('planner_v1')||'[]'); }
+function minutesToWidth(min){ return (min/60)*HOUR_WIDTH; }
+function widthToMinutes(px){ return Math.round(px/HOUR_WIDTH*60); }
+function snapToGrid(px){ const step = (SNAP_MINUTES/60)*HOUR_WIDTH; return Math.round(px/step)*step; }
+function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+function formatDuration(min){ const h = Math.floor(min/60); const m = min%60; return h+'h '+(m?m+'m':''); }
+
+// date baseline (day 0 = today). We'll show days from today - pastDays up to futureDays based on viewDays centered on today.
+function buildDaysArray(n){
+  const arr=[];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const half = Math.floor(n/2);
+  for(let i= -half;i< n-half;i++){
+    const d = new Date(today); d.setDate(today.getDate()+i);
+    arr.push(d);
+  }
+  return arr;
+}
+
+// UI: modal create/edit
+function openModal(task){
+  const tpl = document.getElementById('modalTemplate');
+  const overlay = tpl.querySelector('.overlay').cloneNode(true);
+  const modal = tpl.querySelector('.modal').cloneNode(true);
+  document.body.appendChild(overlay);
+  document.body.appendChild(modal);
+  document.getElementById('modalTitle',modal);
+
+  const tName = modal.querySelector('#tName') || modal.querySelector('input#tName');
+  const tDurationH = modal.querySelector('#tDurationH');
+  const tDurationM = modal.querySelector('#tDurationM');
+  const tFamily = modal.querySelector('#tFamily');
+  const tGroup = modal.querySelector('#tGroup');
+  const tUrgent = modal.querySelector('#tUrgent');
+  const tImportant = modal.querySelector('#tImportant');
+  const tColor = modal.querySelector('#tColor');
+  const tBorderColor = modal.querySelector('#tBorderColor');
+  const btnCancel = modal.querySelector('#btnCancel');
+  const btnSave = modal.querySelector('#btnSave');
+  const titleEl = modal.querySelector('#modalTitle');
+
+  if(task){
+    titleEl.textContent = 'Modifier la tâche';
+    tName.value = task.name;
+    const h = Math.floor(task.duration/60);
+    const m = task.duration%60;
+    tDurationH.value = h; tDurationM.value = m;
+    tFamily.value = task.family||''; tGroup.value = task.group||'';
+    tUrgent.checked = !!task.urgent; tImportant.checked = !!task.important;
+    tColor.value = task.color||'#3b82f6'; tBorderColor.value = task.borderColor||'#1f4ed8';
+  } else {
+    titleEl.textContent = 'Nouvelle tâche';
+    tName.value='';
+    tDurationH.value = Math.floor(DEFAULT_DURATION_MIN/60);
+    tDurationM.value = DEFAULT_DURATION_MIN%60;
+    tFamily.value=''; tGroup.value=''; tUrgent.checked=false; tImportant.checked=false;
+    tColor.value='#3b82f6'; tBorderColor.value='#1f4ed8';
+  }
+
+  btnCancel.onclick = ()=>{ modal.remove(); overlay.remove(); };
+  btnSave.onclick = ()=>{
+    const name = tName.value.trim() || 'Tâche';
+    const dur = Math.max(5, parseInt(tDurationH.value||0)*60 + parseInt(tDurationM.value||0));
+    // ensure minutes step of 5
+    const step = 5;
+    const stepped = Math.round(dur/step)*step;
+    if(task){
+      // edit
+      task.name = name; task.duration = stepped;
+      task.family = tFamily.value.trim(); task.group = tGroup.value.trim();
+      task.urgent = tUrgent.checked; task.important = tImportant.checked;
+      task.color = tColor.value; task.borderColor = tBorderColor.value;
+    } else {
+      const nt = { id:uid(), name, duration:stepped, family:tFamily.value.trim(), group:tGroup.value.trim(),
+                  urgent:tUrgent.checked, important:tImportant.checked, color:tColor.value, borderColor:tBorderColor.value,
+                  x:null, dayIndex:null, completed:false };
+      tasks.push(nt);
+    }
+    save(); renderAll();
+    modal.remove(); overlay.remove();
+  };
+}
+
+// render list & groups
+function renderTaskList(){
+  const list = document.getElementById('taskList'); list.innerHTML='';
+  const q = searchInput.value.trim().toLowerCase();
+  // group tasks by family->group
+  const grouped = {};
+  tasks.forEach(t=>{
+    if(q && !(t.name.toLowerCase().includes(q) || (t.family||'').toLowerCase().includes(q) || (t.group||'').toLowerCase().includes(q))) return;
+    const fam = t.family || 'Non classé';
+    if(!grouped[fam]) grouped[fam] = {};
+    const grp = t.group || 'Général';
+    if(!grouped[fam][grp]) grouped[fam][grp]=[];
+    grouped[fam][grp].push(t);
+  });
+  // build DOM
+  Object.keys(grouped).forEach(fam=>{
+    const h = document.createElement('div'); h.style.marginTop='8px';
+    const fh = document.createElement('div'); fh.textContent = fam; fh.style.fontWeight='700'; fh.style.marginTop='6px';
+    list.appendChild(fh);
+    Object.keys(grouped[fam]).forEach(grp=>{
+      const gh = document.createElement('div'); gh.textContent = grp; gh.className='muted-small'; gh.style.marginLeft='6px';
+      list.appendChild(gh);
+      grouped[fam][grp].forEach(t=>{
+        const el = document.createElement('div'); el.className='task-item'; el.draggable=true;
+        el.style.background = t.urgent? '#e03434' : t.color;
+        el.style.borderColor = t.important? '#c60000' : t.borderColor || '#333';
+        if(t.completed) el.classList.add('completed');
+        el.innerHTML = `<div style="display:flex;flex-direction:column;min-width:0;"><div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px">${t.name}</div><div class="task-meta">${formatDuration(t.duration)}</div></div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                          <div style="display:flex;gap:6px;">
+                            <button class="small-btn" data-action="dup" data-id="${t.id}">Dupliquer</button>
+                            <button class="small-btn" data-action="edit" data-id="${t.id}">Éditer</button>
+                            <button class="small-btn" data-action="del" data-id="${t.id}">Suppr</button>
+                          </div>
+                          <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" data-action="toggleDone" data-id="${t.id}" ${t.completed?'checked':''}/> Fait</label>
+                        </div>`;
+        // drag from sidebar
+        el.addEventListener('dragstart', e=>{
+          e.dataTransfer.setData('text/plain', JSON.stringify({type:'fromList',id:t.id}));
+        });
+        list.appendChild(el);
+      });
+    });
+  });
+  countTasksEl.textContent = tasks.length;
+  countPlannedEl.textContent = tasks.filter(t=>t.x!==null).length;
+}
+
+// render timeline (multiple days)
+function renderTimeline(){
+  daysColumn.innerHTML='';
+  const days = buildDaysArray(viewDays);
+  const now = new Date();
+  const millisInDay = 24*60*60*1000;
+  days.forEach((day, index)=>{
+    const dayWrap = document.createElement('div'); dayWrap.className='day';
+    const isToday = day.toDateString() === (new Date()).toDateString();
+    const head = document.createElement('div'); head.className='day-head';
+    const dateStr = day.toLocaleDateString(undefined,{weekday:'short',day:'2-digit',month:'short'});
+    const leftHead = document.createElement('div'); leftHead.innerHTML = `<strong>${dateStr}</strong><div class="muted-small">${isToday?'Aujourd’hui':''}</div>`;
+    const rightHead = document.createElement('div');
+    const collapseBtn = document.createElement('button'); collapseBtn.className='collapse-btn'; collapseBtn.textContent='Replier';
+    rightHead.appendChild(collapseBtn);
+    head.appendChild(leftHead); head.appendChild(rightHead);
+    dayWrap.appendChild(head);
+
+    // hours header
+    const hours = document.createElement('div'); hours.className='hours';
+    for(let h=0;h<24;h++){
+      const hd = document.createElement('div'); hd.className='hour'; hd.style.minWidth=HOUR_WIDTH+'px';
+      hd.textContent = h+'h';
+      hours.appendChild(hd);
+    }
+    dayWrap.appendChild(hours);
+
+    // timeline body
+    const body = document.createElement('div'); body.className='timeline-body'; body.style.minHeight='140px';
+    body.dataset.dayIndex = index;
+    // drop area
+    body.addEventListener('dragover', e=>e.preventDefault());
+    body.addEventListener('drop', e=>{
+      e.preventDefault();
+      const payload = e.dataTransfer.getData('text/plain');
+      if(!payload) return;
+      try{
+        const obj = JSON.parse(payload);
+        if(obj.type === 'fromList'){
+          // place task at position
+          const t = tasks.find(x=>x.id===obj.id);
+          if(!t) return;
+          const rect = body.getBoundingClientRect();
+          let x = e.clientX - rect.left + body.scrollLeft;
+          x = snapToGrid(x);
+          // assign to this day index and x
+          t.x = x; t.dayIndex = index;
+          save(); renderAll();
+        } else if(obj.type === 'fromTimeline'){
+          // moving existing block
+          const t = tasks.find(x=>x.id===obj.id);
+          if(!t) return;
+          const rect = body.getBoundingClientRect();
+          let x = e.clientX - rect.left + body.scrollLeft;
+          x = snapToGrid(x);
+          t.x = x; t.dayIndex = index;
+          save(); renderAll();
+        }
+      } catch(err){ console.log(err); }
+    });
+
+    // render tasks for this day
+    const dayTasks = tasks.filter(t=>t.dayIndex===index);
+    // calculate overlaps: simple algorithm to stack parallel columns
+    const placed = [];
+    dayTasks.forEach(t=>{
+      const start = t.x; const end = t.x + minutesToWidth(t.duration);
+      // find column index
+      let col=0;
+      while(true){
+        let conflict = false;
+        for(const p of placed){
+          if(p.col===col){
+            const pstart = p.task.x; const pend = p.task.x + minutesToWidth(p.task.duration);
+            if(!(end <= pstart || start >= pend)){ conflict=true; break; }
+          }
+        }
+        if(!conflict) break;
+        col++;
+      }
+      placed.push({task:t,col});
+    });
+    // compute max columns
+    const maxCol = placed.reduce((m,p)=>Math.max(m,p.col),0)+1;
+    // create container with proper height
+    body.style.height = Math.max(140, maxCol*40)+'px';
+
+    // draw grid vertical markers (every 15 min thin lines)
+    const grid = document.createElement('div');
+    grid.style.position='absolute'; grid.style.left='0'; grid.style.top='0'; grid.style.right='0'; grid.style.bottom='0';
+    grid.style.pointerEvents='none';
+    const totalWidth = HOUR_WIDTH*24;
+    grid.style.width = totalWidth+'px';
+    for(let i=0;i<24*(60/SNAP_MINUTES);i++){
+      const g = document.createElement('div');
+      g.style.position='absolute'; g.style.left = (i*(SNAP_MINUTES/60)*HOUR_WIDTH)+'px';
+      g.style.top='0'; g.style.bottom='0'; g.style.width='1px';
+      g.style.background = (i%4===0)?'rgba(0,0,0,0.04)':'rgba(0,0,0,0.02)';
+      grid.appendChild(g);
+    }
+    body.appendChild(grid);
+
+    // render placed task blocks
+    placed.forEach(p=>{
+      const t = p.task;
+      const block = document.createElement('div'); block.className='task-block';
+      block.style.left = t.x+'px';
+      block.style.top = (p.col*36 + 6)+'px';
+      block.style.width = minutesToWidth(t.duration)+'px';
+      block.style.background = t.urgent? '#e03434' : t.color;
+      block.style.border = '3px solid ' + (t.important? '#c60000' : (t.borderColor||'#0f172a'));
+      if(t.completed) block.classList.add('completed');
+      block.textContent = t.name + ' • ' + formatDuration(t.duration);
+      // actions on block: edit, dup, delete via context menu
+      block.addEventListener('dblclick', ()=>{
+        // open modal to edit and prefill with this task
+        openModal(t);
+      });
+      // drag from timeline
+      block.draggable = true;
+      block.addEventListener('dragstart', e=>{
+        e.dataTransfer.setData('text/plain', JSON.stringify({type:'fromTimeline',id:t.id}));
+      });
+      // right click menu small controls
+      const ctrl = document.createElement('div');
+      ctrl.style.position='absolute'; ctrl.style.right='6px'; ctrl.style.top='4px'; ctrl.style.display='flex'; ctrl.style.gap='6px';
+      const btnDup = document.createElement('button'); btnDup.className='small-btn'; btnDup.textContent='Dup'; btnDup.title='Dupliquer ici';
+      btnDup.onclick = (ev)=>{ ev.stopPropagation(); duplicateTask(t.id, true); };
+      const btnDel = document.createElement('button'); btnDel.className='small-btn'; btnDel.textContent='Del'; btnDel.onclick = (ev)=>{ ev.stopPropagation(); deleteTask(t.id); };
+      const chk = document.createElement('input'); chk.type='checkbox'; chk.checked = !!t.completed; chk.style.transform='scale(1.1)'; chk.title='Marquer comme fait'; chk.onchange = (ev)=>{t.completed = chk.checked; save(); renderAll();};
+      ctrl.appendChild(btnDup); ctrl.appendChild(btnDel); ctrl.appendChild(chk);
+      block.appendChild(ctrl);
+
+      body.appendChild(block);
+    });
+
+    // current time line
+    if(showCurrentLineCheckbox.checked){
+      const todayIndex = days.findIndex(d=> d.toDateString() === (new Date()).toDateString());
+      if(todayIndex === index){
+        const now = new Date();
+        const leftPx = (now.getHours() + now.getMinutes()/60) * HOUR_WIDTH;
+        const line = document.createElement('div');
+        line.style.position='absolute'; line.style.left = leftPx+'px'; line.style.top = '0'; line.style.bottom='0'; line.style.width='2px'; line.style.background='red'; line.style.zIndex='5';
+        body.appendChild(line);
+      }
+    }
+
+    // collapse behavior
+    let collapsed=false;
+    collapseBtn.onclick = ()=>{
+      collapsed = !collapsed;
+      body.style.display = collapsed? 'none':'block';
+      collapseBtn.textContent = collapsed? 'Déplier':'Replier';
+    };
+
+    // append dayWrap
+    dayWrap.appendChild(body);
+    daysColumn.appendChild(dayWrap);
+  });
+}
+
+// duplication and delete
+function deleteTask(id){
+  if(!confirm('Supprimer cette tâche ?')) return;
+  tasks = tasks.filter(t=>t.id!==id);
+  save(); renderAll();
+}
+function duplicateTask(id, inTimeline=false){
+  const t = tasks.find(x=>x.id===id); if(!t) return;
+  const copy = JSON.parse(JSON.stringify(t)); copy.id = uid();
+  if(inTimeline){
+    copy.x = (copy.x!==null)? (copy.x + 10) : null;
+    copy.dayIndex = copy.dayIndex;
+    tasks.push(copy);
+  } else {
+    copy.x = null; copy.dayIndex = null; copy.completed = false;
+    tasks.push(copy);
+  }
+  save(); renderAll();
+}
+
+// initial render
+function renderAll(){ renderTaskList(); renderTimeline(); }
+function setupHandlers(){
+  document.getElementById('btnNew').addEventListener('click', ()=> openModal(null));
+  document.getElementById('resetSearch').addEventListener('click', ()=>{ searchInput.value=''; renderTaskList(); });
+  searchInput.addEventListener('input', ()=> renderTaskList());
+  document.getElementById('viewDay').addEventListener('click', ()=>{ viewDays=1; renderAll(); });
+  document.getElementById('viewWeek').addEventListener('click', ()=>{ viewDays=7; renderAll(); });
+  document.getElementById('viewMonth').addEventListener('click', ()=>{ viewDays=30; renderAll(); });
+  // delegate buttons in task list
+  document.getElementById('taskList').addEventListener('click', e=>{
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    const action = btn.dataset.action; const id = btn.dataset.id;
+    if(action==='edit'){ const t = tasks.find(x=>x.id===id); if(t) openModal(t); }
+    if(action==='del'){ deleteTask(id); }
+    if(action==='dup'){ duplicateTask(id,false); }
+  });
+  document.getElementById('taskList').addEventListener('change', e=>{
+    const cb = e.target; if(cb && cb.dataset && cb.dataset.action==='toggleDone'){ const id=cb.dataset.id; const t=tasks.find(x=>x.id===id); if(t){ t.completed = cb.checked; save(); renderAll(); } }
+  });
+  // persist every minute for safety
+  setInterval(save,60000);
+  // refresh current line every minute
+  setInterval(()=>{ renderTimeline(); },60000);
+}
+
+// init
+load(); setupHandlers(); renderAll();
+</script>
+</body>
+</html>
