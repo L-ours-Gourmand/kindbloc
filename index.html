@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Planificateur visuel - Prototype</title>
+<title>Planificateur visuel - Prototype v2</title>
 <style>
   :root{
     --sidebar-width:320px;
     --hour-width:80px;
     --bg:#f6f7fb;
     --card:#ffffff;
-    --muted:#777;
+    --muted:#6b7280;
     --accent:#3467eb;
   }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:var(--bg);color:#222;}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:var(--bg);color:#0f172a;}
   .app{display:flex;height:100vh;box-sizing:border-box;}
   .sidebar{width:var(--sidebar-width);background:linear-gradient(180deg,#fff,#fbfdff);border-right:1px solid #e6e9ef;padding:16px;box-sizing:border-box;overflow:auto;}
   .sidebar h2{margin:0 0 8px 0;font-size:18px;}
@@ -35,19 +35,22 @@
   .hours{position:relative;display:flex;border-top:1px solid #eee;border-bottom:1px solid #eee;overflow:hidden;}
   .hour{min-width:var(--hour-width);padding:8px 6px;text-align:center;border-right:1px dashed #f0f2f7;font-size:12px;color:var(--muted);background:linear-gradient(180deg,#fafbff,#fff);}
   .timeline-body{position:relative;height:140px;overflow:hidden;}
-  .task-block{position:absolute;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;box-shadow:0 4px 10px rgba(50,60,90,0.08);cursor:move;}
-  .task-controls{display:flex;gap:6px;align-items:center;}
+  .task-block{position:absolute;height:58px;border-radius:10px;display:flex;flex-direction:column;justify-content:flex-start;padding:8px;color:#fff;font-weight:600;box-shadow:0 6px 16px rgba(50,60,90,0.08);cursor:move;overflow:visible;}
+  .task-name{font-size:13px;line-height:1.1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:6px;}
+  .time-badge{position:absolute;right:8px;top:8px;background:#fff;color:#111;padding:4px 8px;border-radius:8px;border:2px solid rgba(0,0,0,0.12);font-size:12px;font-weight:700;box-shadow:0 2px 6px rgba(8,10,30,0.06);}
+  .block-controls{position:absolute;right:8px;bottom:6px;display:flex;gap:6px;align-items:center;}
+  .icon-btn{width:28px;height:28px;border-radius:6px;border:none;background:rgba(255,255,255,0.15);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+  .done-chip{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:8px;background:rgba(255,255,255,0.9);font-size:12px;color:#111;border:2px solid rgba(0,0,0,0.06);}
   .chip{font-size:12px;padding:6px 8px;border-radius:6px;background:#f4f6fb;border:1px solid #e6e9ef;}
-  .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(10,20,50,0.2);padding:18px;z-index:999;width:420px;max-width:95%;}
+  .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:12px;box-shadow:0 12px 40px rgba(10,20,50,0.25);padding:18px;z-index:999;width:500px;max-width:95%;}
   .overlay{position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.35);z-index:990;}
   label{display:block;font-size:13px;margin-top:8px;color:#223;}
   input[type="text"], input[type="number"], select {width:100%;padding:8px;border-radius:8px;border:1px solid #e3e6f0;background:#fff;box-sizing:border-box;}
   .row{display:flex;gap:8px;align-items:center;}
   .muted-small{color:#8892b0;font-size:12px;}
   footer{padding:8px 16px;text-align:center;color:var(--muted);font-size:13px;}
-  .small-icon{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:#fff;border:1px solid #e6e9ef;cursor:pointer;}
-  .collapse-btn{font-size:12px;padding:6px;border-radius:6px;background:#fff;border:1px solid #e6e9ef;}
   .completed{opacity:0.45;text-decoration:line-through;}
+  .svg-btn{width:20px;height:20px;display:inline-block;vertical-align:middle;fill:currentColor}
   @media (max-width:900px){:root{--sidebar-width:260px;--hour-width:60px} .sidebar{display:block}}
 </style>
 </head>
@@ -64,13 +67,13 @@
       <button class="small-btn" id="resetSearch">X</button>
     </div>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
-      <div class="chip">Total tâches: <span id="countTasks">0</span></div>
+      <div class="chip">Total tâches non planifiées: <span id="countTasks">0</span></div>
       <div class="chip">Planifiées: <span id="countPlanned">0</span></div>
     </div>
     <div class="task-list" id="taskList"></div>
     <div style="height:40px;"></div>
     <div style="margin-top:12px;">
-      <div class="muted-small">Astuce: glisse une tâche vers la timeline.</div>
+      <div class="muted-small">Astuce: glisse une tâche vers la timeline pour la placer.</div>
     </div>
   </aside>
 
@@ -127,6 +130,7 @@
     <label>Couleur bordure</label><input id="tBorderColor" type="color" value="#1f4ed8" />
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
       <button class="small-btn" id="btnCancel">Annuler</button>
+      <button class="small-btn" id="btnDuplicate">Dupliquer</button>
       <button class="btn" id="btnSave">Enregistrer</button>
     </div>
   </div>
@@ -148,8 +152,8 @@ const showCurrentLineCheckbox = document.getElementById('showCurrentLine');
 
 // helpers
 function uid(){ return 't'+Math.random().toString(36).slice(2,9); }
-function save(){ localStorage.setItem('planner_v1', JSON.stringify(tasks)); }
-function load(){ tasks = JSON.parse(localStorage.getItem('planner_v1')||'[]'); }
+function save(){ localStorage.setItem('planner_v2', JSON.stringify(tasks)); }
+function load(){ tasks = JSON.parse(localStorage.getItem('planner_v2')||'[]'); }
 function minutesToWidth(min){ return (min/60)*HOUR_WIDTH; }
 function widthToMinutes(px){ return Math.round(px/HOUR_WIDTH*60); }
 function snapToGrid(px){ const step = (SNAP_MINUTES/60)*HOUR_WIDTH; return Math.round(px/step)*step; }
@@ -169,15 +173,16 @@ function buildDaysArray(n){
 }
 
 // UI: modal create/edit
+let currentModalTask = null;
 function openModal(task){
+  currentModalTask = task || null;
   const tpl = document.getElementById('modalTemplate');
   const overlay = tpl.querySelector('.overlay').cloneNode(true);
   const modal = tpl.querySelector('.modal').cloneNode(true);
   document.body.appendChild(overlay);
   document.body.appendChild(modal);
-  document.getElementById('modalTitle',modal);
 
-  const tName = modal.querySelector('#tName') || modal.querySelector('input#tName');
+  const tName = modal.querySelector('#tName');
   const tDurationH = modal.querySelector('#tDurationH');
   const tDurationM = modal.querySelector('#tDurationM');
   const tFamily = modal.querySelector('#tFamily');
@@ -188,6 +193,7 @@ function openModal(task){
   const tBorderColor = modal.querySelector('#tBorderColor');
   const btnCancel = modal.querySelector('#btnCancel');
   const btnSave = modal.querySelector('#btnSave');
+  const btnDuplicate = modal.querySelector('#btnDuplicate');
   const titleEl = modal.querySelector('#modalTitle');
 
   if(task){
@@ -208,37 +214,47 @@ function openModal(task){
     tColor.value='#3b82f6'; tBorderColor.value='#1f4ed8';
   }
 
-  btnCancel.onclick = ()=>{ modal.remove(); overlay.remove(); };
+  btnCancel.onclick = ()=>{ modal.remove(); overlay.remove(); currentModalTask=null; };
   btnSave.onclick = ()=>{
     const name = tName.value.trim() || 'Tâche';
-    const dur = Math.max(5, parseInt(tDurationH.value||0)*60 + parseInt(tDurationM.value||0));
-    // ensure minutes step of 5
+    const raw = Math.max(5, parseInt(tDurationH.value||0)*60 + parseInt(tDurationM.value||0));
     const step = 5;
-    const stepped = Math.round(dur/step)*step;
+    const dur = Math.round(raw/step)*step;
     if(task){
       // edit
-      task.name = name; task.duration = stepped;
+      task.name = name; task.duration = dur;
       task.family = tFamily.value.trim(); task.group = tGroup.value.trim();
       task.urgent = tUrgent.checked; task.important = tImportant.checked;
       task.color = tColor.value; task.borderColor = tBorderColor.value;
     } else {
-      const nt = { id:uid(), name, duration:stepped, family:tFamily.value.trim(), group:tGroup.value.trim(),
+      const nt = { id:uid(), name, duration:dur, family:tFamily.value.trim(), group:tGroup.value.trim(),
                   urgent:tUrgent.checked, important:tImportant.checked, color:tColor.value, borderColor:tBorderColor.value,
                   x:null, dayIndex:null, completed:false };
       tasks.push(nt);
     }
     save(); renderAll();
-    modal.remove(); overlay.remove();
+    modal.remove(); overlay.remove(); currentModalTask=null;
+  };
+  // Duplicate: create a copy but keep modal open
+  btnDuplicate.onclick = ()=>{
+    if(task){
+      const copy = JSON.parse(JSON.stringify(task)); copy.id = uid();
+      copy.x = null; copy.dayIndex = null; copy.completed = false;
+      tasks.push(copy);
+      save(); renderAll();
+      // keep modal open so user can duplicate multiple times
+    }
   };
 }
 
-// render list & groups
+// render list & groups (only show unplaced tasks)
+// Unplaced = dayIndex === null
 function renderTaskList(){
   const list = document.getElementById('taskList'); list.innerHTML='';
   const q = searchInput.value.trim().toLowerCase();
-  // group tasks by family->group
+  // group tasks by family->group but only unplaced
   const grouped = {};
-  tasks.forEach(t=>{
+  tasks.filter(t=> t.dayIndex===null).forEach(t=>{
     if(q && !(t.name.toLowerCase().includes(q) || (t.family||'').toLowerCase().includes(q) || (t.group||'').toLowerCase().includes(q))) return;
     const fam = t.family || 'Non classé';
     if(!grouped[fam]) grouped[fam] = {};
@@ -248,7 +264,6 @@ function renderTaskList(){
   });
   // build DOM
   Object.keys(grouped).forEach(fam=>{
-    const h = document.createElement('div'); h.style.marginTop='8px';
     const fh = document.createElement('div'); fh.textContent = fam; fh.style.fontWeight='700'; fh.style.marginTop='6px';
     list.appendChild(fh);
     Object.keys(grouped[fam]).forEach(grp=>{
@@ -262,7 +277,6 @@ function renderTaskList(){
         el.innerHTML = `<div style="display:flex;flex-direction:column;min-width:0;"><div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px">${t.name}</div><div class="task-meta">${formatDuration(t.duration)}</div></div>
                         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
                           <div style="display:flex;gap:6px;">
-                            <button class="small-btn" data-action="dup" data-id="${t.id}">Dupliquer</button>
                             <button class="small-btn" data-action="edit" data-id="${t.id}">Éditer</button>
                             <button class="small-btn" data-action="del" data-id="${t.id}">Suppr</button>
                           </div>
@@ -276,16 +290,14 @@ function renderTaskList(){
       });
     });
   });
-  countTasksEl.textContent = tasks.length;
-  countPlannedEl.textContent = tasks.filter(t=>t.x!==null).length;
+  countTasksEl.textContent = tasks.filter(t=>t.dayIndex===null).length;
+  countPlannedEl.textContent = tasks.filter(t=>t.dayIndex!==null).length;
 }
 
 // render timeline (multiple days)
 function renderTimeline(){
   daysColumn.innerHTML='';
   const days = buildDaysArray(viewDays);
-  const now = new Date();
-  const millisInDay = 24*60*60*1000;
   days.forEach((day, index)=>{
     const dayWrap = document.createElement('div'); dayWrap.className='day';
     const isToday = day.toDateString() === (new Date()).toDateString();
@@ -319,17 +331,15 @@ function renderTimeline(){
       try{
         const obj = JSON.parse(payload);
         if(obj.type === 'fromList'){
-          // place task at position
+          // move task from sidebar into timeline (no duplicate)
           const t = tasks.find(x=>x.id===obj.id);
           if(!t) return;
           const rect = body.getBoundingClientRect();
           let x = e.clientX - rect.left + body.scrollLeft;
           x = snapToGrid(x);
-          // assign to this day index and x
           t.x = x; t.dayIndex = index;
           save(); renderAll();
         } else if(obj.type === 'fromTimeline'){
-          // moving existing block
           const t = tasks.find(x=>x.id===obj.id);
           if(!t) return;
           const rect = body.getBoundingClientRect();
@@ -347,7 +357,6 @@ function renderTimeline(){
     const placed = [];
     dayTasks.forEach(t=>{
       const start = t.x; const end = t.x + minutesToWidth(t.duration);
-      // find column index
       let col=0;
       while(true){
         let conflict = false;
@@ -362,12 +371,10 @@ function renderTimeline(){
       }
       placed.push({task:t,col});
     });
-    // compute max columns
     const maxCol = placed.reduce((m,p)=>Math.max(m,p.col),0)+1;
-    // create container with proper height
-    body.style.height = Math.max(140, maxCol*40)+'px';
+    body.style.height = Math.max(140, maxCol*56)+'px';
 
-    // draw grid vertical markers (every 15 min thin lines)
+    // draw grid vertical markers (every SNAP_MINUTES)
     const grid = document.createElement('div');
     grid.style.position='absolute'; grid.style.left='0'; grid.style.top='0'; grid.style.right='0'; grid.style.bottom='0';
     grid.style.pointerEvents='none';
@@ -387,31 +394,49 @@ function renderTimeline(){
       const t = p.task;
       const block = document.createElement('div'); block.className='task-block';
       block.style.left = t.x+'px';
-      block.style.top = (p.col*36 + 6)+'px';
+      block.style.top = (p.col*56 + 6)+'px';
       block.style.width = minutesToWidth(t.duration)+'px';
       block.style.background = t.urgent? '#e03434' : t.color;
       block.style.border = '3px solid ' + (t.important? '#c60000' : (t.borderColor||'#0f172a'));
       if(t.completed) block.classList.add('completed');
-      block.textContent = t.name + ' • ' + formatDuration(t.duration);
-      // actions on block: edit, dup, delete via context menu
-      block.addEventListener('dblclick', ()=>{
-        // open modal to edit and prefill with this task
-        openModal(t);
-      });
-      // drag from timeline
+
+      // name aligned top-left
+      const nameEl = document.createElement('div'); nameEl.className='task-name';
+      nameEl.textContent = t.name;
+      block.appendChild(nameEl);
+
+      // time badge (white rounded) with border color
+      const badge = document.createElement('div'); badge.className='time-badge';
+      badge.textContent = formatDuration(t.duration);
+      badge.style.borderColor = t.important? '#c60000' : (t.borderColor||'rgba(0,0,0,0.12)');
+      block.appendChild(badge);
+
+      // bottom-right controls: edit (pencil svg), delete (trash svg), done checkbox
+      const ctrl = document.createElement('div'); ctrl.className='block-controls';
+      // edit svg button
+      const editBtn = document.createElement('button'); editBtn.className='icon-btn'; editBtn.title='Éditer';
+      editBtn.innerHTML = `<svg class="svg-btn" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41L18.37 3.29a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
+      editBtn.onclick = (ev)=>{ ev.stopPropagation(); openModal(t); };
+      // delete svg button
+      const delBtn = document.createElement('button'); delBtn.className='icon-btn'; delBtn.title='Supprimer';
+      delBtn.innerHTML = `<svg class="svg-btn" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 3v1H4v2h16V4h-5V3H9zm1 5v10h2V8H10zm4 0v10h2V8h-2zM7 8v10h2V8H7z"/></svg>`;
+      delBtn.onclick = (ev)=>{ ev.stopPropagation(); deleteTask(t.id); };
+      // done checkbox (small)
+      const doneDiv = document.createElement('div'); doneDiv.className='done-chip';
+      const doneChk = document.createElement('input'); doneChk.type='checkbox'; doneChk.checked = !!t.completed;
+      doneChk.onchange = (ev)=>{ t.completed = doneChk.checked; save(); renderAll(); };
+      const doneLabel = document.createElement('div'); doneLabel.textContent = 'Fait'; doneLabel.style.fontSize='12px';
+      doneDiv.appendChild(doneChk); doneDiv.appendChild(doneLabel);
+
+      ctrl.appendChild(editBtn); ctrl.appendChild(delBtn); ctrl.appendChild(doneDiv);
+      block.appendChild(ctrl);
+
+      // interactions
+      block.addEventListener('dblclick', ()=> openModal(t));
       block.draggable = true;
       block.addEventListener('dragstart', e=>{
         e.dataTransfer.setData('text/plain', JSON.stringify({type:'fromTimeline',id:t.id}));
       });
-      // right click menu small controls
-      const ctrl = document.createElement('div');
-      ctrl.style.position='absolute'; ctrl.style.right='6px'; ctrl.style.top='4px'; ctrl.style.display='flex'; ctrl.style.gap='6px';
-      const btnDup = document.createElement('button'); btnDup.className='small-btn'; btnDup.textContent='Dup'; btnDup.title='Dupliquer ici';
-      btnDup.onclick = (ev)=>{ ev.stopPropagation(); duplicateTask(t.id, true); };
-      const btnDel = document.createElement('button'); btnDel.className='small-btn'; btnDel.textContent='Del'; btnDel.onclick = (ev)=>{ ev.stopPropagation(); deleteTask(t.id); };
-      const chk = document.createElement('input'); chk.type='checkbox'; chk.checked = !!t.completed; chk.style.transform='scale(1.1)'; chk.title='Marquer comme fait'; chk.onchange = (ev)=>{t.completed = chk.checked; save(); renderAll();};
-      ctrl.appendChild(btnDup); ctrl.appendChild(btnDel); ctrl.appendChild(chk);
-      block.appendChild(ctrl);
 
       body.appendChild(block);
     });
@@ -448,17 +473,11 @@ function deleteTask(id){
   tasks = tasks.filter(t=>t.id!==id);
   save(); renderAll();
 }
-function duplicateTask(id, inTimeline=false){
-  const t = tasks.find(x=>x.id===id); if(!t) return;
+function duplicateTaskFromModal(taskId){
+  const t = tasks.find(x=>x.id===taskId); if(!t) return;
   const copy = JSON.parse(JSON.stringify(t)); copy.id = uid();
-  if(inTimeline){
-    copy.x = (copy.x!==null)? (copy.x + 10) : null;
-    copy.dayIndex = copy.dayIndex;
-    tasks.push(copy);
-  } else {
-    copy.x = null; copy.dayIndex = null; copy.completed = false;
-    tasks.push(copy);
-  }
+  copy.x = null; copy.dayIndex = null; copy.completed = false;
+  tasks.push(copy);
   save(); renderAll();
 }
 
@@ -478,7 +497,6 @@ function setupHandlers(){
     const action = btn.dataset.action; const id = btn.dataset.id;
     if(action==='edit'){ const t = tasks.find(x=>x.id===id); if(t) openModal(t); }
     if(action==='del'){ deleteTask(id); }
-    if(action==='dup'){ duplicateTask(id,false); }
   });
   document.getElementById('taskList').addEventListener('change', e=>{
     const cb = e.target; if(cb && cb.dataset && cb.dataset.action==='toggleDone'){ const id=cb.dataset.id; const t=tasks.find(x=>x.id===id); if(t){ t.completed = cb.checked; save(); renderAll(); } }
