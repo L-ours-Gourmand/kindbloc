@@ -1,502 +1,332 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Planificateur visuel — Prototype v3.2 (Dark)</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Planificateur v4 — GitHub Sync</title>
 <style>
 :root{
-  --sidebar-width:320px;
-  --hour-width:80px;
-  --bg:#0b1020;
-  --panel:#0f1724;
-  --muted:#98a0b3;
-  --accent:#4f46e5;
-  --card:#0b1220;
-  --glass: rgba(255,255,255,0.03);
-  --danger:#ef4444;
-  --success:#16a34a;
-  --shadow: 0 8px 24px rgba(2,6,23,0.6);
+  --sidebar-width:340px;
+  --hour-width:64px;
+  --bg:#071022; --panel:#0b1320; --muted:#98a0b3; --accent:#7c3aed;
+  --left-bg:#071025; --right-bg:#061021;
 }
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;color:#e6eef8;background:linear-gradient(180deg,#06070b,#071022);}
-.app{display:flex;min-height:100vh;align-items:stretch;}
-.sidebar{width:var(--sidebar-width);background:linear-gradient(180deg,var(--panel),#071025);border-right:1px solid rgba(255,255,255,0.04);padding:18px;overflow:auto;}
-.sidebar h2{margin:0;display:flex;align-items:center;gap:8px;font-size:18px;color:#eaf2ff;}
-.gear{margin-left:auto;background:transparent;border:0;color:var(--muted);cursor:pointer;padding:6px;border-radius:8px}
-.btn{padding:8px 12px;border-radius:10px;background:linear-gradient(180deg,var(--accent),#3730a3);border:none;color:white;cursor:pointer;box-shadow:0 6px 18px rgba(79,70,229,0.14);font-weight:600}
-.row{display:flex;gap:8px;align-items:center}
-.search{margin-top:12px;display:flex;gap:8px;align-items:center}
-.search input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:#dbeafe}
+*{box-sizing:border-box;font-family:Inter,system-ui,Arial,Helvetica,sans-serif}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,#04050a,var(--bg));color:#e6eef8}
+.app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-width);padding:18px;background:var(--left-bg);border-right:1px solid rgba(255,255,255,0.03);overflow:auto}
+.header{display:flex;gap:8px;align-items:center}
+.btn{padding:8px 12px;border-radius:10px;background:linear-gradient(180deg,var(--accent),#4c1d95);border:none;color:#fff;cursor:pointer}
 .small-btn{padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted);cursor:pointer}
+.search{margin-top:12px;display:flex;gap:8px}
+.search input{flex:1;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);color:#e6eef8}
 .task-list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
-.task-item{padding:10px;border-radius:10px;border:2px solid transparent;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:grab;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));}
-.task-name{font-weight:700;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e6eef8}
-.task-meta{font-size:12px;color:var(--muted);margin-top:4px}
-.main{flex:1;display:flex;flex-direction:column;min-height:100vh;padding:18px;overflow:auto}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.02);margin-bottom:12px}
-.views .small-btn{background:transparent;color:var(--muted)}
-.timeline-wrap{flex:1;display:flex;overflow:auto;position:relative;padding:12px}
-.days-column{display:flex;flex-direction:column;gap:14px;width:100%}
-.day{background:linear-gradient(180deg,#071025,#061021);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.02);box-shadow:var(--shadow)}
-.day-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.hour{min-width:var(--hour-width);padding:8px 6px;text-align:center;border-right:1px dashed rgba(255,255,255,0.02);font-size:12px;color:var(--muted);background:transparent}
-.hours{display:flex;border-top:1px solid rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.02);overflow:hidden}
-.timeline-body{position:relative;overflow:auto;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:8px}
+.task-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);cursor:grab;border:2px solid transparent}
+.task-meta{font-size:12px;color:var(--muted)}
+.icon-btn{width:34px;height:34px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.main{flex:1;display:flex;flex-direction:column;padding:16px;background:var(--right-bg);min-height:100vh;overflow:auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.views .small-btn{margin-right:6px}
+.timeline-wrap{overflow:auto}
+.days-column{display:flex;flex-direction:column;gap:14px}
+.day{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+.day-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.hours{display:flex;overflow:hidden;border-top:1px solid rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.02);position:relative}
+.hour{min-width:var(--hour-width);padding:8px;text-align:center;font-size:12px;color:var(--muted);border-right:1px dashed rgba(255,255,255,0.02)}
+.timeline-body{position:relative;min-height:140px;overflow:auto;border-radius:8px}
 .grid-line{position:absolute;top:0;bottom:0;width:1px}
-.task-block{position:absolute;border-radius:10px;display:flex;flex-direction:column;justify-content:flex-start;padding:10px;color:#071025;font-weight:700;box-shadow:0 10px 30px rgba(2,6,23,0.6);cursor:move;overflow:visible}
-.task-block .task-name{color:#071025;font-weight:800}
-.time-badge{position:absolute;right:8px;top:8px;background:white;color:#071025;padding:4px 8px;border-radius:8px;border:2px solid rgba(0,0,0,0.06);font-size:12px;font-weight:700;box-shadow:0 4px 12px rgba(2,6,23,0.2)}
+.task-block{position:absolute;border-radius:10px;padding:10px;color:#071025;font-weight:700;box-shadow:0 10px 30px rgba(2,6,23,0.6);cursor:move;overflow:visible;display:flex;flex-direction:column;align-items:flex-start}
+.block-title{margin-top:6px;font-weight:700;color:#e6eef8;font-size:13px;text-align:left;min-width:70px;max-width:220px;word-break:break-word}
+.time-badge{position:absolute;right:8px;top:8px;background:white;color:#071025;padding:4px 8px;border-radius:8px;border:2px solid rgba(0,0,0,0.06);font-size:12px}
 .block-controls{position:absolute;right:8px;bottom:8px;display:flex;gap:6px;align-items:center}
-.icon-btn{width:30px;height:30px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:#0b1020}
-.done-chip{display:flex;align-items:center;gap:6px;padding:4px;border-radius:8px;background:rgba(255,255,255,0.9);font-size:12px;color:#071025;border:2px solid rgba(0,0,0,0.06)}
-.muted-small{color:var(--muted);font-size:12px}
-.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:linear-gradient(180deg,#071025,#061021);border-radius:12px;box-shadow:0 20px 60px rgba(2,6,23,0.8);padding:18px;z-index:999;width:520px;max-width:95%;color:#e6eef8;border:1px solid rgba(255,255,255,0.03)}
+.check-btn{width:30px;height:30px;border-radius:8px;border:none;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:linear-gradient(180deg,#0b1320,#071025);padding:18px;border-radius:12px;z-index:999;border:1px solid rgba(255,255,255,0.03);min-width:320px;color:#e6eef8}
 .overlay{position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(2,6,23,0.6);z-index:990}
-label{display:block;font-size:13px;margin-top:8px;color:#cfe0ff}
-input[type="text"], input[type="number"], select {width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:#e6eef8;box-sizing:border-box}
-input[type="color"]{background:transparent;border:none;padding:0;height:36px}
-.row-controls{display:flex;gap:8px;align-items:center;justify-content:flex-end}
-.footer{padding:8px 16px;text-align:center;color:var(--muted);font-size:13px}
-@media (max-width:900px){:root{--sidebar-width:100%;--hour-width:56px} .app{flex-direction:column} .sidebar{position:relative} .main{margin-top:12px} .modal{width:95%}}
+.row{display:flex;gap:8px;align-items:center}
+.label{font-size:13px;color:#cfe0ff}
+.footer{padding:8px 12px;color:var(--muted);text-align:center;font-size:13px}
+svg{display:block}
+@media (max-width:900px){.sidebar{width:100%}.app{flex-direction:column}.main{padding:10px}}
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar" id="sidebar">
-    <h2>Planning <button id="btnSettings" class="gear" title="Paramètres">⚙️</button></h2>
-    <div class="row" style="gap:10px;margin-top:10px;">
+    <div class="header"><h2>Planning</h2><button id="btnDisconnect" class="small-btn" title="Déconnexion GitHub" style="margin-left:auto">Déconnecter</button></div>
+    <div class="row" style="margin-top:10px">
       <button class="btn" id="btnNew">+ Nouvelle tâche</button>
-      <div class="muted-small">Durée par défaut : <strong id="defaultDurStr">1h</strong></div>
+      <div class="label" style="margin-left:auto">Durée par défaut : <strong id="defaultDurStr">1h</strong></div>
     </div>
-    <div class="search">
-      <input id="search" placeholder="Rechercher nom, famille ou groupe..." />
-      <button class="small-btn" id="resetSearch">X</button>
-    </div>
-    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
-      <div class="chip" style="background:transparent;border:1px solid rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px">Non planifiées: <span id="countTasks">0</span></div>
-      <div class="chip" style="background:transparent;border:1px solid rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px">Planifiées: <span id="countPlanned">0</span></div>
-    </div>
+    <div class="search"><input id="search" placeholder="Rechercher..." /><button id="resetSearch" class="small-btn">X</button></div>
+    <div style="margin-top:12px;display:flex;gap:8px"><div class="label">Non planifiées: <span id="countTasks">0</span></div><div class="label">Planifiées: <span id="countPlanned">0</span></div></div>
     <div class="task-list" id="taskList"></div>
-    <div style="height:40px;"></div>
-    <div style="margin-top:12px;">
-      <div class="muted-small">Astuce mobile: appuie sur une tâche puis "Placer".</div>
-    </div>
+    <div style="height:40px"></div>
+    <div style="margin-top:12px"><div class="label">Token (local) : <button id="btnToken" class="small-btn">Entrer / Mettre à jour</button></div></div>
   </aside>
 
   <main class="main">
     <div class="topbar">
-      <div class="views">
-        <button class="small-btn" data-view="1" id="viewDay">Jour</button>
-        <button class="small-btn" data-view="7" id="viewWeek">Semaine</button>
-        <button class="small-btn" data-view="30" id="viewMonth">Mois</button>
-      </div>
-      <div class="task-controls">
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;"><input type="checkbox" id="showCurrentLine" checked/> Ligne heure actuelle</label>
-      </div>
+      <div class="views"><button class="small-btn" id="viewDay">Jour</button><button class="small-btn" id="viewWeek">Semaine</button><button class="small-btn" id="viewMonth">Mois</button></div>
+      <div><label class="label"><input type="checkbox" id="showCurrentLine" checked/> Ligne heure actuelle</label></div>
     </div>
 
-    <div class="timeline-wrap" id="timelineWrap">
-      <div style="min-width:100%;">
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div id="daysColumn" class="days-column" style="flex:1"></div>
-        </div>
-      </div>
-    </div>
+    <div class="timeline-wrap" id="timelineWrap"><div><div style="display:flex;gap:12px"><div id="daysColumn" class="days-column" style="flex:1"></div></div></div></div>
 
-    <div class="footer">Prototype v3.2 — thème sombre. Sauvegarde locale + export/import JSON.</div>
+    <div class="footer">Prototype v4 — Sync GitHub (Gist) • Thème sombre</div>
   </main>
 </div>
 
-<!-- task modal -->
+<!-- modals -->
 <div id="modalTemplate" style="display:none">
   <div class="overlay"></div>
-  <div class="modal" role="dialog" aria-modal="true">
+  <div class="modal" role="dialog">
     <h3 id="modalTitle">Nouvelle tâche</h3>
-    <label>Nom</label><input id="tName" type="text" />
-    <div class="row" style="gap:8px;">
-      <div style="flex:1"><label>Durée (heures)</label><input id="tDurationH" type="number" min="0" step="1" value="1"/></div>
-      <div style="flex:1"><label>Durée (minutes)</label><input id="tDurationM" type="number" min="0" step="5" value="0"/></div>
-    </div>
-    <label>Famille</label><input id="tFamily" type="text" placeholder="ex: administratif" />
-    <label>Groupe</label><input id="tGroup" type="text" placeholder="ex: projet X" />
-    <div class="row" style="margin-top:8px;align-items:center;">
-      <label style="flex:1"><input id="tUrgent" type="checkbox" /> Urgent</label>
-      <label style="flex:1"><input id="tImportant" type="checkbox" /> Important</label>
-    </div>
-    <label>Couleur fond (optionnel)</label><input id="tColor" type="color" value="#ffd166" />
-    <label>Couleur bordure (optionnel)</label><input id="tBorderColor" type="color" value="#f4a261" />
-    <div class="row" style="margin-top:8px;align-items:center;">
-      <button class="small-btn" id="btnPlace">Placer</button>
-      <div style="margin-left:auto" class="muted-small">Placement mobile disponible ici.</div>
-    </div>
-    <div class="row-controls">
-      <button class="small-btn" id="btnCancel">Annuler</button>
-      <button class="small-btn" id="btnDuplicate">Dupliquer</button>
-      <button class="btn" id="btnSave">Enregistrer</button>
-    </div>
+    <label class="label">Nom</label><input id="tName" type="text"/>
+    <div class="row"><div style="flex:1"><label class="label">Heures</label><input id="tDurationH" type="number" min="0" step="1"/></div><div style="flex:1"><label class="label">Minutes</label><input id="tDurationM" type="number" min="0" step="5"/></div></div>
+    <label class="label">Famille</label><input id="tFamily" type="text"/>
+    <label class="label">Groupe</label><input id="tGroup" type="text"/>
+    <div class="row" style="margin-top:8px"><label><input id="tUrgent" type="checkbox"/> Urgent</label><label style="margin-left:10px"><input id="tImportant" type="checkbox"/> Important</label></div>
+    <label class="label">Couleur fond</label><input id="tColor" type="color" value="#ffd166"/>
+    <label class="label">Couleur bordure</label><input id="tBorderColor" type="color" value="#f4a261"/>
+    <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px"><button id="btnCancel" class="small-btn">Annuler</button><button id="btnDuplicate" class="small-btn">Dupliquer</button><button id="btnSave" class="btn">Enregistrer</button></div>
   </div>
 </div>
 
-<!-- settings modal -->
-<div id="settingsTpl" style="display:none;">
+<div id="tokenModalTpl" style="display:none">
   <div class="overlay"></div>
-  <div class="modal" role="dialog" aria-modal="true">
-    <h3>Paramètres</h3>
-    <label>Durée par défaut (minutes)</label>
-    <input id="defaultDuration" type="number" min="5" step="5" value="60"/>
-    <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px;">
-      <div><strong>Palette familles</strong></div>
-      <div><button class="small-btn" id="addFam">+ famille</button></div>
-    </div>
-    <div id="familiesList" style="margin-top:8px"></div>
-    <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:12px;">
-      <div><strong>Palette groupes</strong></div>
-      <div><button class="small-btn" id="addGroup">+ groupe</button></div>
-    </div>
-    <div id="groupsList" style="margin-top:8px"></div>
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="small-btn" id="btnExport">Exporter JSON</button>
-      <label class="small-btn" style="padding:6px 10px;cursor:pointer;"><input type="file" id="importFile" style="display:none"/>Importer</label>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
-      <button class="small-btn" id="btnCloseSettings">Fermer</button>
-    </div>
+  <div class="modal" role="dialog">
+    <h3>Connexion GitHub</h3>
+    <label class="label">Ton token (classic) — coller ici</label><input id="ghToken" type="text" style="width:100%"/>
+    <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button id="btnTokCancel" class="small-btn">Annuler</button><button id="btnTokSave" class="btn">Tester & enregistrer</button></div>
+    <div class="label" style="margin-top:8px">Note: le token est stocké localement dans ton navigateur.</div>
   </div>
 </div>
 
 <script>
-// Ensure DOM is loaded (compatibility with Firefox)
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', ()=>{
 
-  // Configuration
-  const HOUR_WIDTH = 80;
-  const SNAP_MINUTES = 15;
-  let DEFAULT_DURATION_MIN = 60;
+/* CONFIG */
+const SNAP_MIN=5; // snap to 5 minutes
+const HOUR_W = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hour-width')) || 64;
+let DEFAULT_DURATION_MIN = 60;
+let DEFAULT_START=0, DEFAULT_END=24; // default visible range, can be overridden per-day
 
-  // State
-  let tasks = [];
-  let viewDays = 1;
-  let familiesPalette = {};
-  let groupsPalette = {};
+/* STATE */
+let tasks = []; // {id,name,duration, family, group, urgent, important, color, borderColor, startMinute (0-1439) or null, dayIndex or null, completed}
+let daySettings = {}; // key = day.toDateString() -> {start, end}
+let gistId = localStorage.getItem('planner_gist_id')||null;
+let ghToken = localStorage.getItem('planner_gh_token')||null;
+let viewDays = 1;
 
-  // Elements
-  const daysColumn = document.getElementById('daysColumn');
-  const searchInput = document.getElementById('search');
-  const countTasksEl = document.getElementById('countTasks');
-  const countPlannedEl = document.getElementById('countPlanned');
+/* ELEMENTS */
+const taskList = document.getElementById('taskList');
+const daysColumn = document.getElementById('daysColumn');
+const searchInput = document.getElementById('search');
+const countTasksEl = document.getElementById('countTasks');
+const countPlannedEl = document.getElementById('countPlanned');
 
-  // Helpers
-  function uid(){ return 't'+Math.random().toString(36).slice(2,9); }
-  function save(){ try{ localStorage.setItem('planner_v3_2', JSON.stringify({tasks,familiesPalette,groupsPalette,DEFAULT_DURATION_MIN})); }catch(e){ console.warn('localStorage failed',e); } }
-  function load(){ try{ const raw = JSON.parse(localStorage.getItem('planner_v3_2')||'null'); if(raw){ tasks=raw.tasks||[]; familiesPalette=raw.familiesPalette||{}; groupsPalette=raw.groupsPalette||{}; DEFAULT_DURATION_MIN=raw.DEFAULT_DURATION_MIN||60; document.getElementById('defaultDuration').value=DEFAULT_DURATION_MIN; document.getElementById('defaultDurStr').textContent = (DEFAULT_DURATION_MIN>=60? (DEFAULT_DURATION_MIN/60+'h') : DEFAULT_DURATION_MIN+'m'); } else { tasks=[]; familiesPalette={}; groupsPalette={}; } }catch(e){ console.warn('load error',e); tasks=[]; familiesPalette={}; groupsPalette={}; } }
+/* HELPERS */
+function uid(){ return 't'+Math.random().toString(36).slice(2,9); }
+function saveLocal(){ try{ localStorage.setItem('planner_v4', JSON.stringify({tasks,daySettings,gistId,DEFAULT_DURATION_MIN})); }catch(e){console.warn(e);} }
+function loadLocal(){ try{ const raw = JSON.parse(localStorage.getItem('planner_v4')||'null'); if(raw){ tasks = raw.tasks||[]; daySettings = raw.daySettings||{}; gistId = raw.gistId||gistId; DEFAULT_DURATION_MIN = raw.DEFAULT_DURATION_MIN||DEFAULT_DURATION_MIN; document.getElementById('defaultDurStr').textContent = DEFAULT_DURATION_MIN>=60? (DEFAULT_DURATION_MIN/60+'h') : (DEFAULT_DURATION_MIN+'m'); } }catch(e){console.warn(e);} }
+function minutesToPx(min){ return (min/60)*HOUR_W; }
+function pxToMinutes(px){ return (px/HOUR_W)*60; }
+function snapMinutes(m){ return Math.round(m/SNAP_MIN)*SNAP_MIN; }
+function formatDuration(min){ const h=Math.floor(min/60); const m=min%60; return (h? h+'h ':'') + (m? m+'m':'') || '0m'; }
+function todayZero(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
+function buildDaysArray(n){ const arr=[]; const t=todayZero(); const half=Math.floor(n/2); for(let i=-half;i<n-half;i++){ const d=new Date(t); d.setDate(t.getDate()+i); arr.push(d); } return arr; }
+function dateKey(d){ return new Date(d).toDateString(); }
 
-  function minutesToWidth(min){ return (min/60)*HOUR_WIDTH; }
-  function snapToGrid(px){ const step = (SNAP_MINUTES/60)*HOUR_WIDTH; return Math.round(px/step)*step; }
-  function formatDuration(min){ const h=Math.floor(min/60); const m=min%60; return (h? h+'h ':'') + (m? m+'m':'') || '0m'; }
-  function buildDaysArray(n){ const arr=[]; const today=new Date(); today.setHours(0,0,0,0); const half=Math.floor(n/2); for(let i=-half;i<n-half;i++){ const d=new Date(today); d.setDate(today.getDate()+i); arr.push(d); } return arr; }
+/* GITHUB GIST API */
+async function testAndSaveToken(token){
+  try{
+    const res = await fetch('https://api.github.com/gists', {method:'GET',headers:{Authorization:'token '+token}});
+    if(res.status===200){ ghToken = token; localStorage.setItem('planner_gh_token', token); alert('Token valide — sauvegardé localement'); return true; }
+    else{ alert('Token invalide ou erreur: '+res.status); return false; }
+  }catch(e){ alert('Erreur de connexion: '+e.message); return false; }
+}
 
-  // Modal (task)
-  let currentModalTask = null;
-  function openModal(task){
-    currentModalTask = task || null;
-    const tpl = document.getElementById('modalTemplate');
-    const overlay = tpl.querySelector('.overlay').cloneNode(true);
-    const modal = tpl.querySelector('.modal').cloneNode(true);
-    document.body.appendChild(overlay);
-    document.body.appendChild(modal);
-
-    const tName = modal.querySelector('#tName');
-    const tDurationH = modal.querySelector('#tDurationH');
-    const tDurationM = modal.querySelector('#tDurationM');
-    const tFamily = modal.querySelector('#tFamily');
-    const tGroup = modal.querySelector('#tGroup');
-    const tUrgent = modal.querySelector('#tUrgent');
-    const tImportant = modal.querySelector('#tImportant');
-    const tColor = modal.querySelector('#tColor');
-    const tBorderColor = modal.querySelector('#tBorderColor');
-    const btnCancel = modal.querySelector('#btnCancel');
-    const btnSave = modal.querySelector('#btnSave');
-    const btnDuplicate = modal.querySelector('#btnDuplicate');
-    const btnPlace = modal.querySelector('#btnPlace');
-
-    if(task){
-      tName.value = task.name || '';
-      tDurationH.value = Math.floor((task.duration||DEFAULT_DURATION_MIN)/60);
-      tDurationM.value = (task.duration||DEFAULT_DURATION_MIN)%60;
-      tFamily.value = task.family||'';
-      tGroup.value = task.group||'';
-      tUrgent.checked = !!task.urgent;
-      tImportant.checked = !!task.important;
-      tColor.value = task.color || '#ffd166';
-      tBorderColor.value = task.borderColor || '#f4a261';
-    } else {
-      tName.value=''; tDurationH.value=Math.floor(DEFAULT_DURATION_MIN/60); tDurationM.value=DEFAULT_DURATION_MIN%60; tFamily.value=''; tGroup.value=''; tUrgent.checked=false; tImportant.checked=false; tColor.value='#ffd166'; tBorderColor.value='#f4a261';
+async function createOrLoadGist(){
+  if(!ghToken) return;
+  try{
+    if(gistId){ // try load
+      const r = await fetch('https://api.github.com/gists/'+gistId, {headers:{Authorization:'token '+ghToken}});
+      if(r.ok){ const data = await r.json(); if(data && data.files && data.files['planificateur_taches.json']){ const content = data.files['planificateur_taches.json'].content; const obj = JSON.parse(content); tasks = obj.tasks||tasks; daySettings = obj.daySettings||daySettings; DEFAULT_DURATION_MIN = obj.DEFAULT_DURATION_MIN||DEFAULT_DURATION_MIN; saveLocal(); renderAll(); return; } }
     }
+    // search existing gist by description
+    const list = await fetch('https://api.github.com/gists', {headers:{Authorization:'token '+ghToken}}).then(r=>r.json());
+    for(const g of list){ if(g.description && g.description.includes('planificateur_taches.json')){ gistId = g.id; localStorage.setItem('planner_gist_id', gistId); await createOrLoadGist(); return; } }
+    // create new
+    const payload = { description: 'planificateur_taches.json — gist privé pour planificateur', public:false, files: { 'planificateur_taches.json': { content: JSON.stringify({tasks:tasks, daySettings:daySettings, DEFAULT_DURATION_MIN:DEFAULT_DURATION_MIN}, null,2) } } };
+    const res = await fetch('https://api.github.com/gists', {method:'POST', headers:{Authorization:'token '+ghToken,'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    if(res.ok){ const d = await res.json(); gistId = d.id; localStorage.setItem('planner_gist_id', gistId); alert('Gist créé et lié à votre compte GitHub'); }
+  }catch(e){ console.error(e); alert('Erreur GitHub: '+e.message); }
+}
 
-    btnCancel.onclick = ()=>{ modal.remove(); overlay.remove(); currentModalTask=null; };
-    btnSave.onclick = ()=>{
-      const name = (tName.value||'').trim() || 'Tâche';
-      const raw = Math.max(5, parseInt(tDurationH.value||0)*60 + parseInt(tDurationM.value||0));
-      const step = 5; const dur = Math.round(raw/step)*step;
-      if(task){
-        task.name = name; task.duration = dur; task.family = tFamily.value.trim(); task.group = tGroup.value.trim();
-        task.urgent = tUrgent.checked; task.important = tImportant.checked;
-        task.color = tColor.value || familiesPalette[task.family] || groupsPalette[task.group] || task.color;
-        task.borderColor = tBorderColor.value || task.borderColor;
-      } else {
-        const fam = tFamily.value.trim(); const grp = tGroup.value.trim();
-        const famColor = familiesPalette[fam]; const grpColor = groupsPalette[grp];
-        const nt = { id:uid(), name, duration:dur, family:fam, group:grp, urgent:tUrgent.checked, important:tImportant.checked, color: tColor.value || famColor || grpColor || '#ffd166', borderColor: tBorderColor.value || famColor || grpColor || '#f4a261', x:null, dayIndex:null, completed:false };
-        tasks.push(nt);
-      }
-      save(); renderAll(); modal.remove(); overlay.remove(); currentModalTask=null;
-    };
-    btnDuplicate.onclick = ()=>{
-      if(task){
-        const copy = JSON.parse(JSON.stringify(task)); copy.id = uid(); copy.x = null; copy.dayIndex = null; copy.completed = false; tasks.push(copy); save(); renderAll();
-      }
-    };
-    btnPlace.onclick = ()=>{
-      const dayOffset = parseInt(prompt("Jour (0 = aujourd'hui, 1 = demain, -1 = hier):","0")) || 0;
-      const timeStr = prompt("Heure de début (HH:MM) ex: 13:30","09:00") || "09:00";
-      const parts = timeStr.split(':'); const hh = parseInt(parts[0]||0); const mm = parseInt(parts[1]||0);
-      const today = new Date(); today.setHours(0,0,0,0); today.setDate(today.getDate()+dayOffset);
-      const days = buildDaysArray(viewDays); let dayIndex = days.findIndex(d=> d.toDateString() === today.toDateString());
-      if(dayIndex<0){ alert("Jour hors vue actuelle. Change la vue."); return; }
-      const x = snapToGrid((hh + mm/60) * HOUR_WIDTH);
-      if(task){ task.x = x; task.dayIndex = dayIndex; save(); renderAll(); } else { const name = (tName.value||'').trim() || 'Tâche'; const raw = Math.max(5, parseInt(tDurationH.value||0)*60 + parseInt(tDurationM.value||0)); const step = 5; const dur = Math.round(raw/step)*step; const nt = { id:uid(), name, duration:dur, family:tFamily.value.trim(), group:tGroup.value.trim(), urgent:tUrgent.checked, important:tImportant.checked, color: tColor.value, borderColor: tBorderColor.value, x:x, dayIndex:dayIndex, completed:false }; tasks.push(nt); save(); renderAll(); modal.remove(); overlay.remove(); currentModalTask=null; }
-    };
-  }
+async function pushToGist(){
+  if(!ghToken || !gistId) return;
+  try{
+    const payload = { files: { 'planificateur_taches.json': { content: JSON.stringify({tasks:tasks, daySettings:daySettings, DEFAULT_DURATION_MIN:DEFAULT_DURATION_MIN}, null,2) } } };
+    const res = await fetch('https://api.github.com/gists/'+gistId, {method:'PATCH', headers:{Authorization:'token '+ghToken,'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    if(!res.ok) console.warn('push failed', res.status);
+  }catch(e){ console.warn('push exception', e); }
+}
 
-  // Settings modal
-  function openSettings(){
-    const tpl = document.getElementById('settingsTpl');
-    const overlay = tpl.querySelector('.overlay').cloneNode(true);
-    const modal = tpl.querySelector('.modal').cloneNode(true);
-    document.body.appendChild(overlay); document.body.appendChild(modal);
+/* UI MODALS */
+function openTokenModal(){
+  const tpl = document.getElementById('tokenModalTpl'); const ov = tpl.querySelector('.overlay').cloneNode(true); const m = tpl.querySelector('.modal').cloneNode(true);
+  document.body.appendChild(ov); document.body.appendChild(m);
+  const input = m.querySelector('#ghToken'); input.value = ghToken||'';
+  m.querySelector('#btnTokCancel').onclick = ()=>{ m.remove(); ov.remove(); };
+  m.querySelector('#btnTokSave').onclick = async ()=>{ const t = input.value.trim(); if(!t) return alert('Colle ton token'); const ok = await testAndSaveToken(t); if(ok){ m.remove(); ov.remove(); await createOrLoadGist(); renderAll(); } };
+}
 
-    const defaultDuration = modal.querySelector('#defaultDuration');
-    const famList = modal.querySelector('#familiesList');
-    const grpList = modal.querySelector('#groupsList');
-    const addFam = modal.querySelector('#addFam');
-    const addGroup = modal.querySelector('#addGroup');
-    const btnExport = modal.querySelector('#btnExport');
-    const importFile = modal.querySelector('#importFile');
-    const btnCloseSettings = modal.querySelector('#btnCloseSettings');
+function openTaskModal(task){
+  const tpl = document.getElementById('modalTemplate'); const ov = tpl.querySelector('.overlay').cloneNode(true); const m = tpl.querySelector('.modal').cloneNode(true);
+  document.body.appendChild(ov); document.body.appendChild(m);
+  const name = m.querySelector('#tName'); const durH = m.querySelector('#tDurationH'); const durM = m.querySelector('#tDurationM'); const fam = m.querySelector('#tFamily'); const grp = m.querySelector('#tGroup'); const urg = m.querySelector('#tUrgent'); const imp = m.querySelector('#tImportant'); const col = m.querySelector('#tColor'); const bcol = m.querySelector('#tBorderColor');
+  if(task){ name.value = task.name; durH.value = Math.floor(task.duration/60); durM.value = task.duration%60; fam.value = task.family||''; grp.value = task.group||''; urg.checked = !!task.urgent; imp.checked = !!task.important; col.value = task.color||'#ffd166'; bcol.value = task.borderColor||'#f4a261'; }
+  else{ name.value=''; durH.value = Math.floor(DEFAULT_DURATION_MIN/60); durM.value = DEFAULT_DURATION_MIN%60; fam.value=''; grp.value=''; urg.checked=false; imp.checked=false; col.value='#ffd166'; bcol.value='#f4a261'; }
+  m.querySelector('#btnCancel').onclick = ()=>{ m.remove(); ov.remove(); };
+  m.querySelector('#btnDuplicate').onclick = ()=>{ if(task){ const copy = JSON.parse(JSON.stringify(task)); copy.id = uid(); copy.startMinute = null; copy.dayIndex = null; copy.completed=false; tasks.push(copy); saveLocal(); pushToGist(); renderAll(); } };
+  m.querySelector('#btnSave').onclick = ()=>{ const nm = (name.value||'').trim()||'Tâche'; const raw = Math.max(5, parseInt(durH.value||0)*60 + parseInt(durM.value||0)); const dur = snapMinutes(raw); if(task){ task.name=nm; task.duration=dur; task.family=fam.value.trim(); task.group=grp.value.trim(); task.urgent=urg.checked; task.important=imp.checked; task.color=col.value; task.borderColor=bcol.value; } else { const nt = { id:uid(), name:nm, duration:dur, family:fam.value.trim(), group:grp.value.trim(), urgent:urg.checked, important:imp.checked, color:col.value, borderColor:bcol.value, startMinute:null, dayIndex:null, completed:false }; tasks.push(nt); } saveLocal(); pushToGist(); renderAll(); m.remove(); ov.remove(); };
+}
 
-    function renderPalettes(){
-      famList.innerHTML=''; grpList.innerHTML='';
-      Object.keys(familiesPalette).forEach(k=>{
-        const row = document.createElement('div'); row.style.display='flex'; row.style.gap='8px'; row.style.alignItems='center';
-        const sw = document.createElement('div'); sw.style.width='28px'; sw.style.height='28px'; sw.style.borderRadius='6px'; sw.style.border='2px solid rgba(255,255,255,0.06)'; sw.style.background = familiesPalette[k];
-        const label = document.createElement('div'); label.style.flex='1'; label.textContent = k; label.style.color='#e6eef8';
-        const del = document.createElement('button'); del.className='small-btn'; del.textContent='Suppr';
-        del.onclick = ()=>{ delete familiesPalette[k]; save(); renderPalettes(); renderAll(); };
-        sw.onclick = ()=>{ const c = prompt('Hex couleur pour '+k, familiesPalette[k]||'#ffffff'); if(c){ familiesPalette[k]=c; save(); renderPalettes(); renderAll(); } };
-        row.appendChild(sw); row.appendChild(label); row.appendChild(del); famList.appendChild(row);
-      });
-      Object.keys(groupsPalette).forEach(k=>{
-        const row = document.createElement('div'); row.style.display='flex'; row.style.gap='8px'; row.style.alignItems='center';
-        const sw = document.createElement('div'); sw.style.width='28px'; sw.style.height='28px'; sw.style.borderRadius='6px'; sw.style.border='2px solid rgba(255,255,255,0.06)'; sw.style.background = groupsPalette[k];
-        const label = document.createElement('div'); label.style.flex='1'; label.textContent = k; label.style.color='#e6eef8';
-        const del = document.createElement('button'); del.className='small-btn'; del.textContent='Suppr';
-        del.onclick = ()=>{ delete groupsPalette[k]; save(); renderPalettes(); renderAll(); };
-        sw.onclick = ()=>{ const c = prompt('Hex couleur pour '+k, groupsPalette[k]||'#ffffff'); if(c){ groupsPalette[k]=c; save(); renderPalettes(); renderAll(); } };
-        row.appendChild(sw); row.appendChild(label); row.appendChild(del); grpList.appendChild(row);
-      });
-    }
-    renderPalettes();
-    addFam.onclick = ()=>{ const name = prompt('Nom de la famille'); if(!name) return; familiesPalette[name] = '#9be7ff'; save(); renderPalettes(); renderAll(); };
-    addGroup.onclick = ()=>{ const name = prompt('Nom du groupe'); if(!name) return; groupsPalette[name] = '#ffd6a5'; save(); renderPalettes(); renderAll(); };
-    btnExport.onclick = ()=>{ const data = JSON.stringify({tasks,familiesPalette,groupsPalette,DEFAULT_DURATION_MIN},null,2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='planner_export_v3_2.json'; a.click(); URL.revokeObjectURL(url); };
-    importFile.addEventListener('change', e=>{ if(e.target.files && e.target.files[0]){ const reader = new FileReader(); reader.onload = ()=>{ try{ const obj = JSON.parse(reader.result); tasks = obj.tasks || tasks; familiesPalette = obj.familiesPalette || familiesPalette; groupsPalette = obj.groupsPalette || groupsPalette; DEFAULT_DURATION_MIN = obj.DEFAULT_DURATION_MIN || DEFAULT_DURATION_MIN; document.getElementById('defaultDuration').value = DEFAULT_DURATION_MIN; save(); renderAll(); renderPalettes(); alert('Import réussi'); }catch(err){ alert('Fichier invalide'); } }; reader.readAsText(e.target.files[0]); } });
-    btnCloseSettings.onclick = ()=>{ modal.remove(); overlay.remove(); };
-    defaultDuration.addEventListener('change', e=>{ DEFAULT_DURATION_MIN = Math.max(5, parseInt(e.target.value||60)); document.getElementById('defaultDurStr').textContent = (DEFAULT_DURATION_MIN>=60? (DEFAULT_DURATION_MIN/60+'h') : DEFAULT_DURATION_MIN+'m'); save(); });
-  }
+/* RENDER LIST */
+function renderTaskList(){
+  taskList.innerHTML='';
+  const q = (searchInput.value||'').trim().toLowerCase();
+  const grouped={};
+  tasks.filter(t=> t.dayIndex===null).forEach(t=>{ if(q && !(t.name.toLowerCase().includes(q) || (t.family||'').toLowerCase().includes(q) || (t.group||'').toLowerCase().includes(q))) return; const fam = t.family||'Non classé'; if(!grouped[fam]) grouped[fam]={}; const grp = t.group||'Général'; if(!grouped[fam][grp]) grouped[fam][grp]=[]; grouped[fam][grp].push(t); });
+  Object.keys(grouped).forEach(fam=>{ const fh=document.createElement('div'); fh.style.fontWeight='800'; fh.style.color='#e6eef8'; fh.textContent=fam; taskList.appendChild(fh); Object.keys(grouped[fam]).forEach(grp=>{ const gh=document.createElement('div'); gh.className='task-meta'; gh.style.marginLeft='6px'; gh.textContent=grp; taskList.appendChild(gh); grouped[fam][grp].forEach(t=>{ const el=document.createElement('div'); el.className='task-item'; el.draggable=true; const bg = t.urgent? 'linear-gradient(180deg,#ff6b6b,#ef4444)' : (t.color||'#ffd166'); const br = t.important? '#ef4444' : (t.borderColor||'#f4a261'); el.style.background = bg; el.style.borderColor = br; if(t.completed) el.style.opacity=0.5; el.innerHTML = '<div style="min-width:0"><div style="font-weight:800;color:#e6eef8;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escapeHtml(t.name)+'</div><div class="task-meta">'+formatDuration(t.duration)+'</div></div>'; const actions = document.createElement('div'); actions.style.display='flex'; actions.style.gap='6px'; // icons
+    const editBtn = document.createElement('button'); editBtn.className='icon-btn'; editBtn.title='Editer'; editBtn.innerHTML = svgEdit(); editBtn.onclick = ()=> openTaskModal(t);
+    const delBtn = document.createElement('button'); delBtn.className='icon-btn'; delBtn.title='Suppr'; delBtn.innerHTML = svgTrash(); delBtn.onclick = ()=>{ if(confirm('Supprimer ?')){ tasks = tasks.filter(x=>x.id!==t.id); saveLocal(); pushToGist(); renderAll(); } };
+    const checkBtn = document.createElement('button'); checkBtn.className='icon-btn'; checkBtn.title='Marquer fait'; checkBtn.innerHTML = t.completed? svgCheckFilled() : svgCheck(); checkBtn.onclick = ()=>{ t.completed=!t.completed; saveLocal(); pushToGist(); renderAll(); };
+    actions.appendChild(editBtn); actions.appendChild(delBtn); actions.appendChild(checkBtn); el.appendChild(actions);
+    el.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', JSON.stringify({type:'fromList',id:t.id})); });
+    el.addEventListener('click', ()=>{ if('ontouchstart' in window && window.innerWidth < 900) openTaskModal(t); });
+    taskList.appendChild(el); }); }); countTasksEl.textContent = tasks.filter(t=>t.dayIndex===null).length; countPlannedEl.textContent = tasks.filter(t=>t.dayIndex!==null).length; }
 
-  // Render task list
-  function renderTaskList(){
-    const list = document.getElementById('taskList');
-    list.innerHTML = '';
-    const q = (searchInput.value||'').trim().toLowerCase();
-    const grouped = {};
-    tasks.filter(t=> t.dayIndex===null).forEach(t=>{
-      if(q && !(t.name.toLowerCase().includes(q) || (t.family||'').toLowerCase().includes(q) || (t.group||'').toLowerCase().includes(q))) return;
-      const fam = t.family || 'Non classé';
-      if(!grouped[fam]) grouped[fam] = {};
-      const grp = t.group || 'Général';
-      if(!grouped[fam][grp]) grouped[fam][grp] = [];
-      grouped[fam][grp].push(t);
+/* RENDER TIMELINE */
+function renderTimeline(){
+  daysColumn.innerHTML='';
+  const days = buildDaysArray(viewDays);
+  days.forEach((day, idx)=>{
+    const dayWrap = document.createElement('div'); dayWrap.className='day';
+    const isToday = day.toDateString() === (new Date()).toDateString();
+    const head = document.createElement('div'); head.className='day-head';
+    const left = document.createElement('div'); left.innerHTML = '<strong style="color:#e6eef8">'+day.toLocaleDateString(undefined,{weekday:'short',day:'2-digit',month:'short'})+'</strong><div class="task-meta">'+(isToday?'Aujourd’hui':'')+'</div>';
+    const right = document.createElement('div'); right.style.display='flex'; right.style.gap='6px'; right.style.alignItems='center';
+    // per-day start/end inputs
+    const key = dateKey(day);
+    if(!daySettings[key]) daySettings[key] = {start:DEFAULT_START, end:DEFAULT_END};
+    const startInput = document.createElement('input'); startInput.type='number'; startInput.value = daySettings[key].start; startInput.min=0; startInput.max=23; startInput.style.width='56px';
+    const endInput = document.createElement('input'); endInput.type='number'; endInput.value = daySettings[key].end; endInput.min=1; endInput.max=24; endInput.style.width='56px';
+    const collapseBtn = document.createElement('button'); collapseBtn.className='small-btn'; collapseBtn.textContent='Replier';
+    right.appendChild(startInput); right.appendChild(endInput); right.appendChild(collapseBtn);
+    head.appendChild(left); head.appendChild(right);
+    dayWrap.appendChild(head);
+
+    // hours header from start to end
+    const start = parseInt(daySettings[key].start||DEFAULT_START);
+    const end = parseInt(daySettings[key].end||DEFAULT_END);
+    const hours = document.createElement('div'); hours.className='hours'; hours.style.position='relative'; hours.style.minWidth = ((end-start)*HOUR_W)+'px';
+    for(let h=start; h<end; h++){ const hd=document.createElement('div'); hd.className='hour'; hd.style.minWidth=HOUR_W+'px'; hd.textContent = h+'h'; hours.appendChild(hd); }
+    dayWrap.appendChild(hours);
+
+    // timeline body
+    const body = document.createElement('div'); body.className='timeline-body'; body.dataset.dayIndex = idx; body.style.minHeight='160px';
+    body.addEventListener('dragover', e=> e.preventDefault());
+    body.addEventListener('drop', e=>{ e.preventDefault(); const p = e.dataTransfer.getData('text/plain'); if(!p) return; try{ const obj = JSON.parse(p); const rect = body.getBoundingClientRect(); const relX = e.clientX - rect.left + body.scrollLeft; const minutes = snapMinutes(Math.round(pxToMinutes(relX) + start*60)); const t = tasks.find(x=>x.id===obj.id); if(t){ t.startMinute = minutes; t.dayIndex = idx; saveLocal(); pushToGist(); renderAll(); } }catch(err){console.warn(err);} });
+
+    // grid lines every SNAP_MIN, with thicker at 30 and hour
+    const grid = document.createElement('div'); grid.style.position='absolute'; grid.style.left='0'; grid.style.top='0'; grid.style.right='0'; grid.style.bottom='0'; grid.style.pointerEvents='none'; grid.style.width = ((end-start)*HOUR_W)+'px';
+    const totalSlots = (end-start)*60/SNAP_MIN;
+    for(let i=0;i<totalSlots;i++){ const g = document.createElement('div'); g.className='grid-line'; g.style.left = (i*(SNAP_MIN/60)*HOUR_W)+'px'; if(i % (60/SNAP_MIN) === 0){ g.style.background='rgba(255,255,255,0.06)'; g.style.width='2px'; } else if(i % (30/SNAP_MIN) ===0){ g.style.background='rgba(255,255,255,0.035)'; g.style.width='1px'; } else { g.style.background='rgba(255,255,255,0.02)'; g.style.width='1px'; } grid.appendChild(g); }
+    body.appendChild(grid);
+
+    // tasks for this day
+    const dayTasks = tasks.filter(t=> t.dayIndex===idx);
+    const placed = [];
+    dayTasks.forEach(t=>{ const startMin = t.startMinute; const endMin = startMin + t.duration; let col=0; while(true){ let conflict=false; for(const p of placed){ if(p.col===col){ const pstart=p.task.startMinute; const pend=pstart+p.task.duration; if(!(endMin <= pstart || startMin >= pend)){ conflict=true; break; } } } if(!conflict) break; col++; } placed.push({task:t,col}); });
+    const maxCol = placed.reduce((m,p)=>Math.max(m,p.col),-1)+1; body.style.height = Math.max(160, maxCol*72)+'px';
+
+    placed.forEach(p=>{
+      const t = p.task;
+      const leftPx = minutesToPx(t.startMinute - start);
+      const widthPx = Math.max(44, minutesToPx(t.duration));
+      const block = document.createElement('div'); block.className='task-block';
+      block.style.left = leftPx+'px'; block.style.top = (p.col*72 + 8)+'px'; block.style.width = widthPx+'px';
+      const bg = t.urgent? 'linear-gradient(180deg,#ffb3b3,#ff7b7b)' : (t.color||'#ffd166');
+      block.style.background = bg; block.style.border = '3px solid '+(t.important? '#ef4444' : (t.borderColor||'#f4a261'));
+      if(t.completed) block.style.opacity=0.5;
+      const title = document.createElement('div'); title.className='block-title'; title.textContent = t.name;
+      const badge = document.createElement('div'); badge.className='time-badge'; badge.textContent = formatDuration(t.duration);
+      const ctrl = document.createElement('div'); ctrl.className='block-controls';
+      const editBtn = document.createElement('button'); editBtn.className='icon-btn'; editBtn.title='Editer'; editBtn.innerHTML = svgEdit(); editBtn.onclick = (ev)=>{ ev.stopPropagation(); openTaskModal(t); };
+      const delBtn = document.createElement('button'); delBtn.className='icon-btn'; delBtn.title='Suppr'; delBtn.innerHTML = svgTrash(); delBtn.onclick = (ev)=>{ ev.stopPropagation(); if(confirm('Supprimer ?')){ tasks = tasks.filter(x=>x.id!==t.id); saveLocal(); pushToGist(); renderAll(); } };
+      const checkBtn = document.createElement('button'); checkBtn.className='check-btn'; checkBtn.title='Marquer fait'; checkBtn.innerHTML = t.completed? svgCheckFilled() : svgCheck(); checkBtn.onclick = (ev)=>{ ev.stopPropagation(); t.completed=!t.completed; saveLocal(); pushToGist(); renderAll(); };
+      ctrl.appendChild(editBtn); ctrl.appendChild(delBtn); ctrl.appendChild(checkBtn);
+      block.appendChild(badge); block.appendChild(ctrl); block.appendChild(title);
+      block.draggable=true;
+      block.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', JSON.stringify({type:'fromTimeline',id:t.id})); });
+      block.addEventListener('dblclick', ()=> openTaskModal(t));
+      body.appendChild(block);
     });
-    Object.keys(grouped).forEach(fam=>{
-      const fh = document.createElement('div'); fh.style.fontWeight='700'; fh.style.marginTop='6px'; fh.style.color='#e6eef8'; fh.textContent = fam; list.appendChild(fh);
-      Object.keys(grouped[fam]).forEach(grp=>{
-        const gh = document.createElement('div'); gh.className='muted-small'; gh.style.marginLeft='6px'; gh.textContent = grp; list.appendChild(gh);
-        grouped[fam][grp].forEach(t=>{
-          const el = document.createElement('div'); el.className='task-item'; el.draggable = true;
-          const bg = t.urgent? 'linear-gradient(180deg,#ff6b6b,#ef4444)' : (t.color || '#ffd166');
-          const br = t.important? '#ef4444' : (t.borderColor || '#f4a261');
-          el.style.background = bg; el.style.borderColor = br;
-          if(t.completed) el.classList.add('completed');
-          el.innerHTML = '<div style="display:flex;flex-direction:column;min-width:0;"><div class="task-name">'+escapeHtml(t.name)+'</div><div class="task-meta">'+formatDuration(t.duration)+'</div></div>' +
-                         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;"><div style="display:flex;gap:6px;"><button class="small-btn" data-action="edit" data-id="'+t.id+'">Éditer</button><button class="small-btn" data-action="del" data-id="'+t.id+'">Suppr</button></div><label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" data-action="toggleDone" data-id="'+t.id+'" '+(t.completed?'checked':'')+'/></label></div>';
-          el.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', JSON.stringify({type:'fromList',id:t.id})); });
-          el.addEventListener('click', e=>{ if('ontouchstart' in window && window.innerWidth < 900){ openModal(t); } });
-          list.appendChild(el);
-        });
-      });
-    });
-    countTasksEl.textContent = tasks.filter(t=>t.dayIndex===null).length;
-    countPlannedEl.textContent = tasks.filter(t=>t.dayIndex!==null).length;
-  }
 
-  // Allow dropping back to sidebar to unplace
-  const sidebar = document.getElementById('sidebar');
-  sidebar.addEventListener('dragover', e=> e.preventDefault());
-  sidebar.addEventListener('drop', e=>{ e.preventDefault(); const payload = e.dataTransfer.getData('text/plain'); if(!payload) return; try{ const obj = JSON.parse(payload); const t = tasks.find(x=>x.id===obj.id); if(t){ t.x = null; t.dayIndex = null; save(); renderAll(); } }catch(err){ console.log(err); } });
-
-  // Render timeline
-  function renderTimeline(){
-    daysColumn.innerHTML = '';
-    const days = buildDaysArray(viewDays);
-    days.forEach((day, index)=>{
-      const dayWrap = document.createElement('div'); dayWrap.className='day';
-      const isToday = day.toDateString() === (new Date()).toDateString();
-      const head = document.createElement('div'); head.className='day-head';
-      const dateStr = day.toLocaleDateString(undefined,{weekday:'short',day:'2-digit',month:'short'});
-      const leftHead = document.createElement('div'); leftHead.innerHTML = '<strong style="color:#e6eef8">'+dateStr+'</strong><div class="muted-small">'+(isToday?'Aujourd’hui':'')+'</div>';
-      const rightHead = document.createElement('div');
-      const collapseBtn = document.createElement('button'); collapseBtn.className='collapse-btn'; collapseBtn.textContent='Replier';
-      rightHead.appendChild(collapseBtn);
-      head.appendChild(leftHead); head.appendChild(rightHead);
-      dayWrap.appendChild(head);
-
-      // hours header
-      const hours = document.createElement('div'); hours.className='hours';
-      for(let h=0; h<24; h++){ const hd = document.createElement('div'); hd.className='hour'; hd.style.minWidth = HOUR_WIDTH+'px'; hd.textContent = h+'h'; hours.appendChild(hd); }
-      dayWrap.appendChild(hours);
-
-      // body
-      const body = document.createElement('div'); body.className='timeline-body'; body.style.minHeight='160px'; body.dataset.dayIndex = index;
-      body.addEventListener('dragover', e=> e.preventDefault());
-      body.addEventListener('drop', e=>{ e.preventDefault(); const payload = e.dataTransfer.getData('text/plain'); if(!payload) return; try{ const obj = JSON.parse(payload); const rect = body.getBoundingClientRect(); let x = e.clientX - rect.left + body.scrollLeft; x = snapToGrid(x); const t = tasks.find(x=>x.id===obj.id); if(t){ t.x = x; t.dayIndex = index; save(); renderAll(); } }catch(err){ console.log(err); } });
-
-      // grid: 15/30/60
-      const grid = document.createElement('div'); grid.style.position='absolute'; grid.style.left='0'; grid.style.top='0'; grid.style.right='0'; grid.style.bottom='0'; grid.style.pointerEvents='none'; grid.style.width = (HOUR_WIDTH*24)+'px';
-      for(let i=0;i<24*(60/SNAP_MINUTES);i++){ const g = document.createElement('div'); g.className='grid-line'; g.style.left = (i*(SNAP_MINUTES/60)*HOUR_WIDTH)+'px'; if(i%4===0){ g.style.background='rgba(255,255,255,0.06)'; g.style.width='2px'; } else if(i%2===0){ g.style.background='rgba(255,255,255,0.035)'; g.style.width='1px'; } else { g.style.background='rgba(255,255,255,0.02)'; g.style.width='1px'; } grid.appendChild(g); }
-      body.appendChild(grid);
-
-      // tasks for this day
-      const dayTasks = tasks.filter(t=>t.dayIndex===index);
-      const placed = [];
-      dayTasks.forEach(t=>{
-        const start = t.x; const end = t.x + minutesToWidth(t.duration);
-        let col = 0;
-        while(true){
-          let conflict = false;
-          for(const p of placed){
-            if(p.col === col){
-              const pstart = p.task.x; const pend = p.task.x + minutesToWidth(p.task.duration);
-              if(!(end <= pstart || start >= pend)){ conflict = true; break; }
-            }
-          }
-          if(!conflict) break;
-          col++;
-        }
-        placed.push({task:t,col:col});
-      });
-      const maxCol = placed.reduce((m,p)=>Math.max(m,p.col),0)+1;
-      body.style.height = Math.max(160, maxCol*72)+'px';
-
-      placed.forEach(p=>{
-        const t = p.task;
-        const block = document.createElement('div'); block.className='task-block';
-        block.style.left = t.x+'px';
-        block.style.top = (p.col*72 + 8)+'px';
-        block.style.width = Math.max(44, minutesToWidth(t.duration))+'px';
-        // color & border
-        const bg = t.urgent? '#ffb3b3' : (t.color || '#ffd166');
-        block.style.background = bg;
-        block.style.border = '3px solid ' + (t.important? '#ef4444' : (t.borderColor || '#f4a261'));
-        if(t.completed) block.classList.add('completed');
-
-        // name (dark text on light badge inside block)
-        const nameEl = document.createElement('div'); nameEl.className='task-name'; nameEl.textContent = t.name;
-        block.appendChild(nameEl);
-
-        const badge = document.createElement('div'); badge.className='time-badge'; badge.textContent = formatDuration(t.duration);
-        badge.style.borderColor = t.important? '#ef4444' : (t.borderColor||'rgba(0,0,0,0.12)');
-        block.appendChild(badge);
-
-        const ctrl = document.createElement('div'); ctrl.className='block-controls';
-        const editBtn = document.createElement('button'); editBtn.className='icon-btn'; editBtn.title='Éditer';
-        editBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="#071025"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 00 0-1.41L18.37 3.29a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
-        editBtn.onclick = (ev)=>{ ev.stopPropagation(); openModal(t); };
-        const delBtn = document.createElement('button'); delBtn.className='icon-btn'; delBtn.title='Supprimer';
-        delBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="#071025"><path d="M9 3v1H4v2h16V4h-5V3H9zm1 5v10h2V8H10zm4 0v10h2V8h-2zM7 8v10h2V8H7z"/></svg>';
-        delBtn.onclick = (ev)=>{ ev.stopPropagation(); deleteTask(t.id); };
-        const doneChk = document.createElement('input'); doneChk.type='checkbox'; doneChk.checked = !!t.completed; doneChk.onchange = ()=>{ t.completed = doneChk.checked; save(); renderAll(); };
-        const doneDiv = document.createElement('div'); doneDiv.className='done-chip'; doneDiv.appendChild(doneChk);
-        ctrl.appendChild(editBtn); ctrl.appendChild(delBtn); ctrl.appendChild(doneDiv);
-        block.appendChild(ctrl);
-
-        block.addEventListener('dblclick', ()=> openModal(t));
-        block.draggable = true;
-        block.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', JSON.stringify({type:'fromTimeline',id:t.id})); });
-        body.appendChild(block);
-      });
-
-      // current time line
-      if(document.getElementById('showCurrentLine').checked){
-        const todayIndex = days.findIndex(d=> d.toDateString() === (new Date()).toDateString());
-        if(todayIndex === index){
-          const now = new Date(); const leftPx = (now.getHours() + now.getMinutes()/60) * HOUR_WIDTH;
-          const line = document.createElement('div'); line.style.position='absolute'; line.style.left = leftPx+'px'; line.style.top='0'; line.style.bottom='0'; line.style.width='2px'; line.style.background = 'linear-gradient(180deg,#ff4d4d,#ff1f1f)'; line.style.zIndex='5';
-          body.appendChild(line);
+    // current time line
+    if(document.getElementById('showCurrentLine').checked){
+      const todayIndex = days.findIndex(d=> d.toDateString()=== new Date().toDateString());
+      if(todayIndex===idx){
+        const now = new Date(); const startH = parseInt(daySettings[dateKey(day)].start||DEFAULT_START); const nowMin = now.getHours()*60 + now.getMinutes();
+        if(nowMin >= startH*60 && nowMin <= (daySettings[dateKey(day)].end||DEFAULT_END)*60){
+          const leftPx = minutesToPx(nowMin - startH*60);
+          const line = document.createElement('div'); line.style.position='absolute'; line.style.left = leftPx+'px'; line.style.top='0'; line.style.bottom='0'; line.style.width='3px'; line.style.background='linear-gradient(180deg,#ff4d4d,#ff1f1f)'; line.style.zIndex='6'; body.appendChild(line);
         }
       }
+    }
 
-      let collapsed=false; collapseBtn.onclick = ()=>{ collapsed = !collapsed; body.style.display = collapsed? 'none':'block'; collapseBtn.textContent = collapsed? 'Déplier':'Replier'; };
-      dayWrap.appendChild(body); daysColumn.appendChild(dayWrap);
-    });
-  }
+    startInput.onchange = ()=>{ daySettings[key].start = Math.max(0, Math.min(23, parseInt(startInput.value||0))); saveLocal(); pushToGist(); renderAll(); };
+    endInput.onchange = ()=>{ daySettings[key].end = Math.max(1, Math.min(24, parseInt(endInput.value||24))); saveLocal(); pushToGist(); renderAll(); };
+    collapseBtn.onclick = ()=>{ const visible = body.style.display !== 'none'; body.style.display = visible? 'none':'block'; collapseBtn.textContent = visible? 'Déplier':'Replier'; };
 
-  // Delete
-  function deleteTask(id){ if(!confirm('Supprimer cette tâche ?')) return; tasks = tasks.filter(t=>t.id!==id); save(); renderAll(); }
+    dayWrap.appendChild(body); daysColumn.appendChild(dayWrap);
+  });
+}
 
-  // Export / import
-  function exportJSON(){ const data = JSON.stringify({tasks,familiesPalette,groupsPalette,DEFAULT_DURATION_MIN},null,2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='planner_export_v3_2.json'; a.click(); URL.revokeObjectURL(url); }
-  function importJSON(file){ const reader = new FileReader(); reader.onload = ()=>{ try{ const obj = JSON.parse(reader.result); tasks = obj.tasks || tasks; familiesPalette = obj.familiesPalette || familiesPalette; groupsPalette = obj.groupsPalette || groupsPalette; DEFAULT_DURATION_MIN = obj.DEFAULT_DURATION_MIN || DEFAULT_DURATION_MIN; document.getElementById('defaultDuration').value = DEFAULT_DURATION_MIN; save(); renderAll(); alert('Import réussi'); }catch(err){ alert('Fichier invalide'); } }; reader.readAsText(file); }
+/* ACTIONS */
+document.getElementById('btnNew').addEventListener('click', ()=> openTaskModal(null));
+document.getElementById('btnToken').addEventListener('click', ()=> openTokenModal());
+document.getElementById('resetSearch').addEventListener('click', ()=>{ searchInput.value=''; renderTaskList(); });
+searchInput.addEventListener('input', ()=> renderTaskList());
+document.getElementById('viewDay').addEventListener('click', ()=>{ viewDays=1; renderAll(); });
+document.getElementById('viewWeek').addEventListener('click', ()=>{ viewDays=7; renderAll(); });
+document.getElementById('viewMonth').addEventListener('click', ()=>{ viewDays=30; renderAll(); });
+document.getElementById('btnDisconnect').addEventListener('click', ()=>{ if(confirm('Supprimer token local et déconnecter GitHub ?')){ ghToken=null; localStorage.removeItem('planner_gh_token'); gistId=null; localStorage.removeItem('planner_gist_id'); saveLocal(); alert('Déconnecté'); } });
 
-  // Render all
-  function renderAll(){ renderTaskList(); renderTimeline(); }
+// Sidebar drop to unplace
+document.getElementById('sidebar').addEventListener('dragover', e=> e.preventDefault());
+document.getElementById('sidebar').addEventListener('drop', e=>{ e.preventDefault(); const p = e.dataTransfer.getData('text/plain'); if(!p) return; try{ const obj = JSON.parse(p); const t = tasks.find(x=>x.id===obj.id); if(t){ t.startMinute=null; t.dayIndex=null; saveLocal(); pushToGist(); renderAll(); } }catch(err){console.warn(err);} });
 
-  // handlers & init
-  function setupHandlers(){
-    document.getElementById('btnNew').addEventListener('click', ()=> openModal(null));
-    document.getElementById('btnSettings').addEventListener('click', ()=> openSettings());
-    document.getElementById('resetSearch').addEventListener('click', ()=>{ searchInput.value=''; renderTaskList(); });
-    searchInput.addEventListener('input', ()=> renderTaskList());
-    document.getElementById('viewDay').addEventListener('click', ()=>{ viewDays=1; renderAll(); });
-    document.getElementById('viewWeek').addEventListener('click', ()=>{ viewDays=7; renderAll(); });
-    document.getElementById('viewMonth').addEventListener('click', ()=>{ viewDays=30; renderAll(); });
-    document.getElementById('taskList').addEventListener('click', e=>{ const btn = e.target.closest('button'); if(!btn) return; const action = btn.dataset.action; const id = btn.dataset.id; if(action==='edit'){ const t=tasks.find(x=>x.id===id); if(t) openModal(t); } if(action==='del'){ deleteTask(id); } });
-    document.getElementById('taskList').addEventListener('change', e=>{ const cb=e.target; if(cb && cb.dataset && cb.dataset.action==='toggleDone'){ const id=cb.dataset.id; const t=tasks.find(x=>x.id===id); if(t){ t.completed=cb.checked; save(); renderAll(); } } });
-    document.getElementById('btnExport').addEventListener('click', exportJSON);
-    document.getElementById('importFile').addEventListener('change', e=>{ if(e.target.files && e.target.files[0]) importJSON(e.target.files[0]); });
-    setInterval(save,60000); setInterval(()=>{ renderTimeline(); },60000);
-  }
+/* SAVE/LOAD GIST manually */
+async function syncFromGist(){ if(!ghToken) return; await createOrLoadGist(); }
+async function syncToGist(){ await pushToGist(); }
 
-  // util: escape html for safety
-  function escapeHtml(str){ return String(str).replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+/* UTIL */
+function svgEdit(){ return '<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"#071025\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 00 0-1.41L18.37 3.29a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z\"/></svg>'; }
+function svgTrash(){ return '<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"#071025\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M9 3v1H4v2h16V4h-5V3H9zm1 5v10h2V8H10zm4 0v10h2V8h-2zM7 8v10h2V8H7z\"/></svg>'; }
+function svgCheck(){ return '<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M20 6L9 17l-5-5\" stroke=\"#071025\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>'; }
+function svgCheckFilled(){ return '<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M20 6L9 17l-5-5\" stroke=\"#071025\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>'; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-  // init load
-  load();
-  setupHandlers();
-  renderAll();
+/* INIT */
+loadLocal();
+if(localStorage.getItem('planner_gh_token')){ ghToken = localStorage.getItem('planner_gh_token'); createOrLoadGist(); }
+renderAll();
 
-}); // DOMContentLoaded
+function renderAll(){ renderTaskList(); renderTimeline(); }
+window.renderAll = renderAll;
+
 </script>
 </body>
 </html>
